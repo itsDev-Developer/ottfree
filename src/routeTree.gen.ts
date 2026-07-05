@@ -9,38 +9,153 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as ApiProxySplatRouteImport } from './routes/api/proxy/$'
+import { Route as AuthenticatedWatchChatIdRouteImport } from './routes/_authenticated/watch.$chatId'
+import { Route as AuthenticatedFolderFolderIdRouteImport } from './routes/_authenticated/folder.$folderId'
+import { Route as AuthenticatedChannelChannelIdRouteImport } from './routes/_authenticated/channel.$channelId'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const ApiProxySplatRoute = ApiProxySplatRouteImport.update({
+  id: '/api/proxy/$',
+  path: '/api/proxy/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWatchChatIdRoute =
+  AuthenticatedWatchChatIdRouteImport.update({
+    id: '/watch/$chatId',
+    path: '/watch/$chatId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedFolderFolderIdRoute =
+  AuthenticatedFolderFolderIdRouteImport.update({
+    id: '/folder/$folderId',
+    path: '/folder/$folderId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedChannelChannelIdRoute =
+  AuthenticatedChannelChannelIdRouteImport.update({
+    id: '/channel/$channelId',
+    path: '/channel/$channelId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/search': typeof AuthenticatedSearchRoute
+  '/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
+  '/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
+  '/watch/$chatId': typeof AuthenticatedWatchChatIdRoute
+  '/api/proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/search': typeof AuthenticatedSearchRoute
+  '/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
+  '/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
+  '/watch/$chatId': typeof AuthenticatedWatchChatIdRoute
+  '/api/proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/search': typeof AuthenticatedSearchRoute
+  '/_authenticated/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
+  '/_authenticated/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
+  '/_authenticated/watch/$chatId': typeof AuthenticatedWatchChatIdRoute
+  '/api/proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/home'
+    | '/search'
+    | '/channel/$channelId'
+    | '/folder/$folderId'
+    | '/watch/$chatId'
+    | '/api/proxy/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/home'
+    | '/search'
+    | '/channel/$channelId'
+    | '/folder/$folderId'
+    | '/watch/$chatId'
+    | '/api/proxy/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/login'
+    | '/_authenticated/home'
+    | '/_authenticated/search'
+    | '/_authenticated/channel/$channelId'
+    | '/_authenticated/folder/$folderId'
+    | '/_authenticated/watch/$chatId'
+    | '/api/proxy/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  ApiProxySplatRoute: typeof ApiProxySplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +163,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/search': {
+      id: '/_authenticated/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof AuthenticatedSearchRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/proxy/$': {
+      id: '/api/proxy/$'
+      path: '/api/proxy/$'
+      fullPath: '/api/proxy/$'
+      preLoaderRoute: typeof ApiProxySplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/watch/$chatId': {
+      id: '/_authenticated/watch/$chatId'
+      path: '/watch/$chatId'
+      fullPath: '/watch/$chatId'
+      preLoaderRoute: typeof AuthenticatedWatchChatIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/folder/$folderId': {
+      id: '/_authenticated/folder/$folderId'
+      path: '/folder/$folderId'
+      fullPath: '/folder/$folderId'
+      preLoaderRoute: typeof AuthenticatedFolderFolderIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/channel/$channelId': {
+      id: '/_authenticated/channel/$channelId'
+      path: '/channel/$channelId'
+      fullPath: '/channel/$channelId'
+      preLoaderRoute: typeof AuthenticatedChannelChannelIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
+  AuthenticatedChannelChannelIdRoute: typeof AuthenticatedChannelChannelIdRoute
+  AuthenticatedFolderFolderIdRoute: typeof AuthenticatedFolderFolderIdRoute
+  AuthenticatedWatchChatIdRoute: typeof AuthenticatedWatchChatIdRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedSearchRoute: AuthenticatedSearchRoute,
+  AuthenticatedChannelChannelIdRoute: AuthenticatedChannelChannelIdRoute,
+  AuthenticatedFolderFolderIdRoute: AuthenticatedFolderFolderIdRoute,
+  AuthenticatedWatchChatIdRoute: AuthenticatedWatchChatIdRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
+  ApiProxySplatRoute: ApiProxySplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
