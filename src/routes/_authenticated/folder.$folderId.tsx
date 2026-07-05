@@ -77,7 +77,7 @@ function FolderPage() {
       <div className="mt-10 flex items-center justify-center gap-3">
         <button
           disabled={page <= 1}
-          onClick={() => nav({ search: (p) => ({ ...p, page: page - 1 }) })}
+          onClick={() => nav({ search: ((p: { page: number; q: string }) => ({ ...p, page: page - 1 })) })}
           className="rounded-full border border-white/10 bg-white/5 p-2 disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -85,7 +85,7 @@ function FolderPage() {
         <span className="text-sm text-muted-foreground">Page {page}</span>
         <button
           disabled={!query.data?.hasMore}
-          onClick={() => nav({ search: (p) => ({ ...p, page: page + 1 }) })}
+          onClick={() => nav({ search: ((p: { page: number; q: string }) => ({ ...p, page: page + 1 })) })}
           className="rounded-full border border-white/10 bg-white/5 p-2 disabled:opacity-40"
         >
           <ChevronRight className="h-4 w-4" />
