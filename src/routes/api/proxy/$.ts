@@ -76,6 +76,21 @@ async function proxy(request: Request, splat: string): Promise<Response> {
     });
   }
 
+  // Any other request that upstream tries to redirect to /login means the
+  // session cookie is missing/expired. Convert to 401 with no Location so the
+  // browser XHR does NOT follow into /api/proxy/login (which 500s), and the
+  // client-side interceptor can bounce the user to the SPA /login page.
+  if (
+    (upstream.status === 301 || upstream.status === 302 || upstream.status === 303 || upstream.status === 307 || upstream.status === 308)
+  ) {
+    const loc = upstream.headers.get("location") ?? "";
+    if (loc === "/login" || loc === "/api/proxy/login" || loc.startsWith("/login?") || loc.startsWith("/api/proxy/login?")) {
+      respHeaders.delete("location");
+      return new Response(null, { status: 401, headers: respHeaders });
+    }
+  }
+
+
   return new Response(upstream.body, {
     status: upstream.status,
     statusText: upstream.statusText,
