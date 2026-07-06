@@ -22,7 +22,7 @@ export async function login(username: string, password: string): Promise<void> {
   const form = new URLSearchParams({ username, password });
   await api.post("/login", form, {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    validateStatus: (s) => s < 400 || s === 302,
+    validateStatus: (s) => s >= 200 && s < 300,
   });
 }
 
