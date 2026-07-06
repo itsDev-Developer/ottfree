@@ -41,13 +41,18 @@ async function proxy(request: Request, splat: string): Promise<Response> {
 
   const respHeaders = new Headers();
   upstream.headers.forEach((value, key) => {
-    if (HOP_BY_HOP.has(key.toLowerCase())) return;
-    // Rewrite Set-Cookie so it targets the current host, not the backend
-    if (key.toLowerCase() === "set-cookie") {
+    const k = key.toLowerCase();
+    if (HOP_BY_HOP.has(k)) return;
+    if (k === "set-cookie") {
       const rewritten = value
         .replace(/;\s*Domain=[^;]+/gi, "")
         .replace(/;\s*Secure/gi, "");
       respHeaders.append("set-cookie", rewritten);
+      return;
+    }
+    // Keep redirects within the proxy so the browser doesn't leave for the SPA
+    if (k === "location" && value.startsWith("/") && !value.startsWith("/api/proxy/")) {
+      respHeaders.set(key, `/api/proxy${value}`);
       return;
     }
     respHeaders.set(key, value);
