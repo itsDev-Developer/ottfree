@@ -59,6 +59,23 @@ async function proxy(request: Request, splat: string): Promise<Response> {
     respHeaders.set(key, value);
   });
 
+  // Special case: POST /login returns 302 that the browser auto-follows via
+  // XHR. Following to GET /login hits a backend endpoint that 500s. Translate
+  // the redirect into a terminal status so the client can decide.
+  if (
+    request.method === "POST" &&
+    splat === "login" &&
+    (upstream.status === 302 || upstream.status === 303)
+  ) {
+    const loc = upstream.headers.get("location") ?? "";
+    const ok = loc === "/" || loc === "/api/proxy/" || loc.endsWith("/home");
+    respHeaders.delete("location");
+    return new Response(null, {
+      status: ok ? 204 : 401,
+      headers: respHeaders,
+    });
+  }
+
   return new Response(upstream.body, {
     status: upstream.status,
     statusText: upstream.statusText,
