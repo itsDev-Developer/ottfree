@@ -5,10 +5,6 @@ import { MediaCard } from "@/components/media/MediaCard";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
-const FILTERS = ["All", "Videos", "Movies", "Series", "Anime", "Documents"] as const;
-type Filter = (typeof FILTERS)[number];
-const SORTS = ["Newest", "Oldest", "Name"] as const;
-
 export const Route = createFileRoute("/_authenticated/channel/$channelId")({
   validateSearch: (s: Record<string, unknown>) => ({
     page: Number(s.page) || 1,
