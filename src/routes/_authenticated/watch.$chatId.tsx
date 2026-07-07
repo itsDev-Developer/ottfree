@@ -27,6 +27,11 @@ function WatchPage() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const title = query.data?.title;
+  useEffect(() => {
+    if (title) trackPlay({ chatId, messageId: id, title });
+  }, [chatId, id, title]);
+
   if (query.isLoading || !query.data) {
     return (
       <div className="px-4 py-6 md:px-8">
