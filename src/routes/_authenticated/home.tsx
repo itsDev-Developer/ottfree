@@ -44,14 +44,14 @@ function HomePage() {
       {cw.length > 0 && (
         <Row title="Continue Watching">
           {cw.map((p) => (
-            <div key={`${p.chatId}-${p.messageId}`} className="w-64 shrink-0 snap-start">
+            <div key={`${p.chatId}-${p.messageId}`} className="w-52 shrink-0 snap-start md:w-60">
               <Link
                 to="/watch/$chatId"
                 params={{ chatId: p.chatId }}
                 search={{ id: p.messageId, hash: p.hash }}
               >
                 <div className="relative">
-                  <Thumbnail src={p.thumbnail} alt={p.title} />
+                  <Thumbnail src={p.thumbnail} alt={p.title} aspect="poster" />
                   <div className="absolute inset-x-2 bottom-2 h-1 overflow-hidden rounded-full bg-white/20">
                     <div
                       className="gradient-primary h-full"
@@ -101,8 +101,8 @@ function HomePage() {
       {data.recent.length > 0 && (
         <Row title="Recently Added">
           {data.recent.map((m) => (
-            <div key={m.id} className="w-64 shrink-0 snap-start">
-              <MediaCard item={m} />
+            <div key={m.id} className="w-52 shrink-0 snap-start md:w-60">
+              <MediaCard item={m} aspect="poster" />
             </div>
           ))}
         </Row>

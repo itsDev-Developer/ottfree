@@ -176,10 +176,17 @@ export async function searchFolder(folderId: string, q: string, page = 1): Promi
   return { items: [...folders, ...files], page, hasMore: !!data.has_next };
 }
 
+function buildStreamUrl(chatId: string, messageId: string, hash: string, filename: string): string {
+  // Backend spec: GET /{chat_id}/{encoded_name}?id={message_id}&hash={hash}
+  // Route through the proxy so cookies/session travel with the request.
+  const safe = filename && filename.trim() ? filename : `file-${messageId}.mp4`;
+  const encoded = encodeURIComponent(safe).replace(/%2F/gi, "_");
+  return `/api/proxy/${chatId}/${encoded}?id=${encodeURIComponent(messageId)}&hash=${encodeURIComponent(hash)}`;
+}
+
 export async function fetchWatch(chatId: string, messageId: string, hash: string): Promise<WatchData> {
-  // Backend's HTML /watch route is broken (`render_page not defined`).
-  // Rebuild the watch payload from the channel listing so playback still works.
-  const streamUrl = `/api/proxy/${chatId}/stream?id=${messageId}&hash=${hash}`;
+  // The backend's HTML /watch page 500s, so we rebuild the payload from the
+  // channel listing and stream directly from /{chat_id}/{encoded_name}.
   let title = `Stream ${messageId}`;
   let thumbnail: string | undefined;
   let size: string | undefined;
@@ -204,7 +211,7 @@ export async function fetchWatch(chatId: string, messageId: string, hash: string
     hash,
     title,
     filename: title,
-    streamUrl,
+    streamUrl: buildStreamUrl(chatId, messageId, hash, title),
     thumbnail,
     size,
     channelName,
