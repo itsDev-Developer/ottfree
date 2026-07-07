@@ -69,6 +69,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Search className="h-4 w-4" />
             <span>Search titles, channels…</span>
           </Link>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="hidden items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/20 md:flex"
+            >
+              <Shield className="h-4 w-4" /> Admin
+            </Link>
+          )}
           <button
             onClick={() => doLogout.mutate()}
             className="rounded-full border border-white/10 bg-white/5 p-2 text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
