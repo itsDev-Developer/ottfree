@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { fetchWatch } from "@/services/backend";
 import { VideoPlayer } from "@/components/player/VideoPlayer";
 import { MediaCard } from "@/components/media/MediaCard";
 import { findProgress, saveProgress } from "@/store/continueWatching";
+import { trackPlay } from "@/store/analytics";
 import { toast } from "sonner";
 import { Share2, Download, Link as LinkIcon, ChevronLeft } from "lucide-react";
 
