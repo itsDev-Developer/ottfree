@@ -17,8 +17,6 @@ function ChannelPage() {
   const { channelId } = Route.useParams();
   const { page, q } = useSearch({ from: "/_authenticated/channel/$channelId" });
   const nav = useNavigate({ from: "/_authenticated/channel/$channelId" });
-  const [filter, setFilter] = useState<Filter>("All");
-  const [sort, setSort] = useState<(typeof SORTS)[number]>("Newest");
   const [term, setTerm] = useState(q);
 
   const query = useQuery({
@@ -29,10 +27,7 @@ function ChannelPage() {
     refetchOnMount: "always",
   });
 
-  const items = (query.data?.items ?? []).slice().sort((a, b) => {
-    if (sort === "Name") return a.title.localeCompare(b.title);
-    return 0;
-  });
+  const items = query.data?.items ?? [];
 
   return (
     <div className="px-4 py-6 md:px-8">
