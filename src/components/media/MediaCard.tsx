@@ -9,7 +9,7 @@ interface Props {
   aspect?: "video" | "poster";
 }
 
-export function MediaCard({ item, aspect = "video" }: Props) {
+export function MediaCard({ item, aspect = "poster" }: Props) {
   const to =
     item.chatId && item.hash
       ? `/watch/${item.chatId}?id=${item.id}&hash=${item.hash}`
