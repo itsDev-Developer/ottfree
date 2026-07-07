@@ -1,9 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, Tv, LogOut, Menu } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { logout } from "@/services/backend";
+import { Home, Search, Tv, LogOut, Menu, Shield } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchSession, logout } from "@/services/backend";
 import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { trackVisit } from "@/store/analytics";
 
 const navItems = [
   { to: "/home", label: "Home", icon: Home },
@@ -13,6 +14,11 @@ const navItems = [
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const qc = useQueryClient();
+  const session = useQuery({ queryKey: ["session"], queryFn: fetchSession, staleTime: 60_000 });
+  const isAdmin = !!session.data?.isAdmin;
+
+  useEffect(() => { trackVisit(path); }, [path]);
+
   const doLogout = useMutation({
     mutationFn: logout,
     onSuccess: () => {
