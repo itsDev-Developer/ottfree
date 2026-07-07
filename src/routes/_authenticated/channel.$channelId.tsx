@@ -59,35 +59,6 @@ function ChannelPage() {
         </form>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`rounded-full border px-4 py-1.5 text-xs font-medium transition ${
-                filter === f
-                  ? "gradient-primary border-transparent text-white shadow-lg shadow-primary/30"
-                  : "border-white/10 bg-white/5 text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-        <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Sort:</span>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])}
-            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm"
-          >
-            {SORTS.map((s) => (
-              <option key={s} value={s} className="bg-background">{s}</option>
-            ))}
-          </select>
-        </div>
-      </div>
 
       {query.isLoading ? (
         <SkeletonGrid />
