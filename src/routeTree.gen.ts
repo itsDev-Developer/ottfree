@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiProxySplatRouteImport } from './routes/api/proxy/$'
 import { Route as AuthenticatedWatchChatIdRouteImport } from './routes/_authenticated/watch.$chatId'
 import { Route as AuthenticatedFolderFolderIdRouteImport } from './routes/_authenticated/folder.$folderId'
@@ -43,6 +44,11 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const ApiProxySplatRoute = ApiProxySplatRouteImport.update({
   id: '/api/proxy/$',
   path: '/api/proxy/$',
@@ -70,6 +76,7 @@ const AuthenticatedChannelChannelIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/search': typeof AuthenticatedSearchRoute
   '/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/search': typeof AuthenticatedSearchRoute
   '/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/admin'
     | '/home'
     | '/search'
     | '/channel/$channelId'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin'
     | '/home'
     | '/search'
     | '/channel/$channelId'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/admin'
     | '/_authenticated/home'
     | '/_authenticated/search'
     | '/_authenticated/channel/$channelId'
@@ -177,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/proxy/$': {
       id: '/api/proxy/$'
       path: '/api/proxy/$'
@@ -209,6 +228,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedChannelChannelIdRoute: typeof AuthenticatedChannelChannelIdRoute
@@ -217,6 +237,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedChannelChannelIdRoute: AuthenticatedChannelChannelIdRoute,
