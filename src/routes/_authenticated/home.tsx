@@ -101,8 +101,8 @@ function HomePage() {
       {data.recent.length > 0 && (
         <Row title="Recently Added">
           {data.recent.map((m) => (
-            <div key={m.id} className="w-64 shrink-0 snap-start">
-              <MediaCard item={m} />
+            <div key={m.id} className="w-52 shrink-0 snap-start md:w-60">
+              <MediaCard item={m} aspect="poster" />
             </div>
           ))}
         </Row>
