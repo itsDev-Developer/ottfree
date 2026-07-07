@@ -5,10 +5,6 @@ import { MediaCard } from "@/components/media/MediaCard";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
-const FILTERS = ["All", "Videos", "Movies", "Series", "Anime", "Documents"] as const;
-type Filter = (typeof FILTERS)[number];
-const SORTS = ["Newest", "Oldest", "Name"] as const;
-
 export const Route = createFileRoute("/_authenticated/channel/$channelId")({
   validateSearch: (s: Record<string, unknown>) => ({
     page: Number(s.page) || 1,
@@ -21,8 +17,6 @@ function ChannelPage() {
   const { channelId } = Route.useParams();
   const { page, q } = useSearch({ from: "/_authenticated/channel/$channelId" });
   const nav = useNavigate({ from: "/_authenticated/channel/$channelId" });
-  const [filter, setFilter] = useState<Filter>("All");
-  const [sort, setSort] = useState<(typeof SORTS)[number]>("Newest");
   const [term, setTerm] = useState(q);
 
   const query = useQuery({
@@ -33,10 +27,7 @@ function ChannelPage() {
     refetchOnMount: "always",
   });
 
-  const items = (query.data?.items ?? []).slice().sort((a, b) => {
-    if (sort === "Name") return a.title.localeCompare(b.title);
-    return 0;
-  });
+  const items = query.data?.items ?? [];
 
   return (
     <div className="px-4 py-6 md:px-8">
@@ -68,35 +59,6 @@ function ChannelPage() {
         </form>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`rounded-full border px-4 py-1.5 text-xs font-medium transition ${
-                filter === f
-                  ? "gradient-primary border-transparent text-white shadow-lg shadow-primary/30"
-                  : "border-white/10 bg-white/5 text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-        <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Sort:</span>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])}
-            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm"
-          >
-            {SORTS.map((s) => (
-              <option key={s} value={s} className="bg-background">{s}</option>
-            ))}
-          </select>
-        </div>
-      </div>
 
       {query.isLoading ? (
         <SkeletonGrid />
@@ -105,9 +67,9 @@ function ChannelPage() {
           <p className="text-muted-foreground">No media found for this view.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {items.map((m) => (
-            <MediaCard key={m.id} item={{ ...m, chatId: m.chatId ?? channelId }} />
+            <MediaCard key={m.id} item={{ ...m, chatId: m.chatId ?? channelId }} aspect="poster" />
           ))}
         </div>
       )}
@@ -135,9 +97,9 @@ function ChannelPage() {
 
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="aspect-video animate-pulse rounded-2xl bg-white/5" />
+    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <div key={i} className="aspect-[2/3] animate-pulse rounded-2xl bg-white/5" />
       ))}
     </div>
   );

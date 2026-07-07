@@ -1,9 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, Tv, LogOut, Menu } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { logout } from "@/services/backend";
+import { Home, Search, Tv, LogOut, Menu, Shield } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchSession, logout } from "@/services/backend";
 import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { trackVisit } from "@/store/analytics";
 
 const navItems = [
   { to: "/home", label: "Home", icon: Home },
@@ -13,6 +14,11 @@ const navItems = [
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const qc = useQueryClient();
+  const session = useQuery({ queryKey: ["session"], queryFn: fetchSession, staleTime: 60_000 });
+  const isAdmin = !!session.data?.isAdmin;
+
+  useEffect(() => { trackVisit(path); }, [path]);
+
   const doLogout = useMutation({
     mutationFn: logout,
     onSuccess: () => {
@@ -63,6 +69,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Search className="h-4 w-4" />
             <span>Search titles, channels…</span>
           </Link>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="hidden items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/20 md:flex"
+            >
+              <Shield className="h-4 w-4" /> Admin
+            </Link>
+          )}
           <button
             onClick={() => doLogout.mutate()}
             className="rounded-full border border-white/10 bg-white/5 p-2 text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
