@@ -67,9 +67,9 @@ function ChannelPage() {
           <p className="text-muted-foreground">No media found for this view.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {items.map((m) => (
-            <MediaCard key={m.id} item={{ ...m, chatId: m.chatId ?? channelId }} />
+            <MediaCard key={m.id} item={{ ...m, chatId: m.chatId ?? channelId }} aspect="poster" />
           ))}
         </div>
       )}
