@@ -10,7 +10,7 @@ interface Props {
 export function HeroBanner({ item }: Props) {
   const to =
     item.chatId && item.hash
-      ? `/watch/${item.chatId}?id=${item.id}&hash=${item.hash}`
+      ? `/watch/${item.chatId}/${item.id}/${item.hash}`
       : "/home";
 
   return (

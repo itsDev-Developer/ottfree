@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { fetchWatch } from "@/services/backend";
@@ -6,31 +6,30 @@ import { VideoPlayer } from "@/components/player/VideoPlayer";
 import { MediaCard } from "@/components/media/MediaCard";
 import { findProgress, saveProgress } from "@/store/continueWatching";
 import { trackPlay } from "@/store/analytics";
+import { getAdsSettings } from "@/store/adminSettings";
 import { toast } from "sonner";
 import { Share2, Download, Link as LinkIcon, ChevronLeft } from "lucide-react";
+import { useState } from "react";
 
-export const Route = createFileRoute("/_authenticated/watch/$chatId")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    id: String(s.id ?? ""),
-    hash: String(s.hash ?? ""),
-  }),
+export const Route = createFileRoute("/_authenticated/watch/$chatId/$messageId/$hash")({
   component: WatchPage,
 });
 
 function WatchPage() {
-  const { chatId } = Route.useParams();
-  const { id, hash } = useSearch({ from: "/_authenticated/watch/$chatId" });
+  const { chatId, messageId, hash } = Route.useParams();
 
   const query = useQuery({
-    queryKey: ["watch", chatId, id, hash],
-    queryFn: () => fetchWatch(chatId, id, hash),
+    queryKey: ["watch", chatId, messageId, hash],
+    queryFn: () => fetchWatch(chatId, messageId, hash),
     staleTime: 5 * 60 * 1000,
   });
 
   const title = query.data?.title;
   useEffect(() => {
-    if (title) trackPlay({ chatId, messageId: id, title });
-  }, [chatId, id, title]);
+    if (title) trackPlay({ chatId, messageId, title });
+  }, [chatId, messageId, title]);
+
+  const [ads] = useState(() => getAdsSettings());
 
   if (query.isLoading || !query.data) {
     return (
@@ -42,7 +41,7 @@ function WatchPage() {
   }
 
   const w = query.data;
-  const progress = findProgress(chatId, id);
+  const progress = findProgress(chatId, messageId);
 
   const copyLink = async () => {
     try {
@@ -66,11 +65,7 @@ function WatchPage() {
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
         <Link to="/home" className="hover:text-foreground">Home</Link>
         <ChevronLeft className="h-3 w-3 rotate-180" />
-        <Link
-          to="/channel/$channelId"
-          params={{ channelId: chatId }}
-          className="hover:text-foreground"
-        >
+        <Link to="/channel/$channelId" params={{ channelId: chatId }} className="hover:text-foreground">
           Channel {chatId}
         </Link>
         <ChevronLeft className="h-3 w-3 rotate-180" />
@@ -83,10 +78,11 @@ function WatchPage() {
             src={w.streamUrl}
             poster={w.thumbnail}
             startTime={progress?.position ?? 0}
+            vastTagUrl={ads.vastTagUrl || undefined}
             onProgress={(position, duration) =>
               saveProgress({
                 chatId,
-                messageId: id,
+                messageId,
                 hash,
                 title: w.title,
                 thumbnail: w.thumbnail,
@@ -96,6 +92,20 @@ function WatchPage() {
               })
             }
           />
+
+          {ads.bannerImageUrl && (
+            <a
+              href={ads.bannerLink || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 block overflow-hidden rounded-2xl border border-white/10"
+            >
+              <img src={ads.bannerImageUrl} alt="Sponsored" className="h-auto w-full object-cover" />
+              <span className="block bg-black/60 px-3 py-1 text-[10px] uppercase tracking-widest text-white/70">
+                Sponsored
+              </span>
+            </a>
+          )}
 
           <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
             <div>

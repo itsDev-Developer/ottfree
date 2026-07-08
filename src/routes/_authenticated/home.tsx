@@ -46,9 +46,8 @@ function HomePage() {
           {cw.map((p) => (
             <div key={`${p.chatId}-${p.messageId}`} className="w-52 shrink-0 snap-start md:w-60">
               <Link
-                to="/watch/$chatId"
-                params={{ chatId: p.chatId }}
-                search={{ id: p.messageId, hash: p.hash }}
+                to="/watch/$chatId/$messageId/$hash"
+                params={{ chatId: p.chatId, messageId: p.messageId, hash: p.hash }}
               >
                 <div className="relative">
                   <Thumbnail src={p.thumbnail} alt={p.title} aspect="poster" />
