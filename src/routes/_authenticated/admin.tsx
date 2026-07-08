@@ -2,7 +2,9 @@ import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { fetchSession } from "@/services/backend";
 import { getVisits, getPlays, clearAnalytics, type VisitEvent, type PlayEvent } from "@/store/analytics";
-import { Activity, Eye, Play, Users, Trash2, ChevronLeft } from "lucide-react";
+import { getAdsSettings, setAdsSettings, type AdsSettings } from "@/store/adminSettings";
+import { Activity, Eye, Play, Users, Trash2, ChevronLeft, Megaphone, Save } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async ({ context, location }) => {
