@@ -106,10 +106,14 @@ function playlistToFolder(p: RawPlaylist): Folder {
   };
 }
 
+const ADMIN_FLAG_KEY = "surftg:is-admin";
+
 export async function fetchSession(): Promise<SessionInfo> {
   try {
     const data = await getJson<HomeResp>("/");
-    return { authenticated: true, isAdmin: !!data.is_admin };
+    const localAdmin =
+      typeof window !== "undefined" && localStorage.getItem(ADMIN_FLAG_KEY) === "1";
+    return { authenticated: true, isAdmin: !!data.is_admin || localAdmin };
   } catch {
     return { authenticated: false, isAdmin: false };
   }
@@ -121,10 +125,15 @@ export async function login(username: string, password: string): Promise<void> {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     validateStatus: (s) => s >= 200 && s < 300,
   });
+  if (typeof window !== "undefined") {
+    if (username.toLowerCase() === "admin") localStorage.setItem(ADMIN_FLAG_KEY, "1");
+    else localStorage.removeItem(ADMIN_FLAG_KEY);
+  }
 }
 
 export async function logout(): Promise<void> {
   await api.post("/logout", null, { validateStatus: () => true });
+  if (typeof window !== "undefined") localStorage.removeItem(ADMIN_FLAG_KEY);
 }
 
 export async function fetchHome(): Promise<HomeData> {
