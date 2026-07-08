@@ -140,8 +140,86 @@ function AdminPage() {
             ))}
           </ul>
         </section>
+
+        <AdsSettingsCard />
       </div>
     </div>
+  );
+}
+
+function AdsSettingsCard() {
+  const [s, setS] = useState<AdsSettings>({ vastTagUrl: "", bannerImageUrl: "", bannerLink: "" });
+  useEffect(() => setS(getAdsSettings()), []);
+
+  const save = () => {
+    setAdsSettings(s);
+    toast.success("Ad settings saved");
+  };
+
+  return (
+    <section className="glass rounded-3xl p-6 lg:col-span-2">
+      <div className="flex items-center gap-3">
+        <div className="gradient-primary flex h-9 w-9 items-center justify-center rounded-xl text-white">
+          <Megaphone className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="font-display text-lg font-bold">Advertising</h2>
+          <p className="text-xs text-muted-foreground">Configure VAST pre-roll and banner ads shown to viewers.</p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <label className="block md:col-span-2">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            VAST Tag URL (video pre-roll)
+          </span>
+          <input
+            value={s.vastTagUrl}
+            onChange={(e) => setS({ ...s, vastTagUrl: e.target.value })}
+            placeholder="https://example.com/vast.xml"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Banner Image URL
+          </span>
+          <input
+            value={s.bannerImageUrl}
+            onChange={(e) => setS({ ...s, bannerImageUrl: e.target.value })}
+            placeholder="https://example.com/banner.jpg"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Banner Click URL
+          </span>
+          <input
+            value={s.bannerLink}
+            onChange={(e) => setS({ ...s, bannerLink: e.target.value })}
+            placeholder="https://advertiser.com"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+          />
+        </label>
+      </div>
+
+      {s.bannerImageUrl && (
+        <div className="mt-4">
+          <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Banner preview</p>
+          <img src={s.bannerImageUrl} alt="Banner preview" className="max-h-40 rounded-xl border border-white/10 object-contain" />
+        </div>
+      )}
+
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={save}
+          className="gradient-primary flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+        >
+          <Save className="h-4 w-4" /> Save ad settings
+        </button>
+      </div>
+    </section>
   );
 }
 
