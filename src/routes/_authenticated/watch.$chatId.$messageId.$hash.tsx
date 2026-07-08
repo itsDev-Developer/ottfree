@@ -9,7 +9,7 @@ import { trackPlay } from "@/store/analytics";
 import { toast } from "sonner";
 import { Share2, Download, Link as LinkIcon, ChevronLeft } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/watch/$chatId")({
+export const Route = createFileRoute("/_authenticated/watch/$chatId/$messageId/$hash")({
   validateSearch: (s: Record<string, unknown>) => ({
     id: String(s.id ?? ""),
     hash: String(s.hash ?? ""),

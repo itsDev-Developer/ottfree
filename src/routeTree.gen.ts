@@ -16,9 +16,9 @@ import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiProxySplatRouteImport } from './routes/api/proxy/$'
-import { Route as AuthenticatedWatchChatIdRouteImport } from './routes/_authenticated/watch.$chatId'
 import { Route as AuthenticatedFolderFolderIdRouteImport } from './routes/_authenticated/folder.$folderId'
 import { Route as AuthenticatedChannelChannelIdRouteImport } from './routes/_authenticated/channel.$channelId'
+import { Route as AuthenticatedWatchChatIdMessageIdHashRouteImport } from './routes/_authenticated/watch.$chatId.$messageId.$hash'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -54,12 +54,6 @@ const ApiProxySplatRoute = ApiProxySplatRouteImport.update({
   path: '/api/proxy/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedWatchChatIdRoute =
-  AuthenticatedWatchChatIdRouteImport.update({
-    id: '/watch/$chatId',
-    path: '/watch/$chatId',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedFolderFolderIdRoute =
   AuthenticatedFolderFolderIdRouteImport.update({
     id: '/folder/$folderId',
@@ -72,6 +66,12 @@ const AuthenticatedChannelChannelIdRoute =
     path: '/channel/$channelId',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedWatchChatIdMessageIdHashRoute =
+  AuthenticatedWatchChatIdMessageIdHashRouteImport.update({
+    id: '/watch/$chatId/$messageId/$hash',
+    path: '/watch/$chatId/$messageId/$hash',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -81,8 +81,8 @@ export interface FileRoutesByFullPath {
   '/search': typeof AuthenticatedSearchRoute
   '/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
   '/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
-  '/watch/$chatId': typeof AuthenticatedWatchChatIdRoute
   '/api/proxy/$': typeof ApiProxySplatRoute
+  '/watch/$chatId/$messageId/$hash': typeof AuthenticatedWatchChatIdMessageIdHashRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -92,8 +92,8 @@ export interface FileRoutesByTo {
   '/search': typeof AuthenticatedSearchRoute
   '/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
   '/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
-  '/watch/$chatId': typeof AuthenticatedWatchChatIdRoute
   '/api/proxy/$': typeof ApiProxySplatRoute
+  '/watch/$chatId/$messageId/$hash': typeof AuthenticatedWatchChatIdMessageIdHashRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,8 +105,8 @@ export interface FileRoutesById {
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
   '/_authenticated/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
-  '/_authenticated/watch/$chatId': typeof AuthenticatedWatchChatIdRoute
   '/api/proxy/$': typeof ApiProxySplatRoute
+  '/_authenticated/watch/$chatId/$messageId/$hash': typeof AuthenticatedWatchChatIdMessageIdHashRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,8 +118,8 @@ export interface FileRouteTypes {
     | '/search'
     | '/channel/$channelId'
     | '/folder/$folderId'
-    | '/watch/$chatId'
     | '/api/proxy/$'
+    | '/watch/$chatId/$messageId/$hash'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -129,8 +129,8 @@ export interface FileRouteTypes {
     | '/search'
     | '/channel/$channelId'
     | '/folder/$folderId'
-    | '/watch/$chatId'
     | '/api/proxy/$'
+    | '/watch/$chatId/$messageId/$hash'
   id:
     | '__root__'
     | '/'
@@ -141,8 +141,8 @@ export interface FileRouteTypes {
     | '/_authenticated/search'
     | '/_authenticated/channel/$channelId'
     | '/_authenticated/folder/$folderId'
-    | '/_authenticated/watch/$chatId'
     | '/api/proxy/$'
+    | '/_authenticated/watch/$chatId/$messageId/$hash'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -203,13 +203,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProxySplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/watch/$chatId': {
-      id: '/_authenticated/watch/$chatId'
-      path: '/watch/$chatId'
-      fullPath: '/watch/$chatId'
-      preLoaderRoute: typeof AuthenticatedWatchChatIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/folder/$folderId': {
       id: '/_authenticated/folder/$folderId'
       path: '/folder/$folderId'
@@ -224,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChannelChannelIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/watch/$chatId/$messageId/$hash': {
+      id: '/_authenticated/watch/$chatId/$messageId/$hash'
+      path: '/watch/$chatId/$messageId/$hash'
+      fullPath: '/watch/$chatId/$messageId/$hash'
+      preLoaderRoute: typeof AuthenticatedWatchChatIdMessageIdHashRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -233,7 +233,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedChannelChannelIdRoute: typeof AuthenticatedChannelChannelIdRoute
   AuthenticatedFolderFolderIdRoute: typeof AuthenticatedFolderFolderIdRoute
-  AuthenticatedWatchChatIdRoute: typeof AuthenticatedWatchChatIdRoute
+  AuthenticatedWatchChatIdMessageIdHashRoute: typeof AuthenticatedWatchChatIdMessageIdHashRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -242,7 +242,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedChannelChannelIdRoute: AuthenticatedChannelChannelIdRoute,
   AuthenticatedFolderFolderIdRoute: AuthenticatedFolderFolderIdRoute,
-  AuthenticatedWatchChatIdRoute: AuthenticatedWatchChatIdRoute,
+  AuthenticatedWatchChatIdMessageIdHashRoute:
+    AuthenticatedWatchChatIdMessageIdHashRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -258,13 +259,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
