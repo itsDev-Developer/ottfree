@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { fetchHome } from "@/services/backend";
-import { HeroBanner } from "@/components/media/HeroBanner";
+import { FeaturedCarousel } from "@/components/media/FeaturedCarousel";
 import { MediaCard } from "@/components/media/MediaCard";
 import { Row } from "@/components/media/Row";
 import { Link } from "@tanstack/react-router";
 import { Thumbnail } from "@/components/media/Thumbnail";
 import { getContinueWatching } from "@/store/continueWatching";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { WatchProgress } from "@/store/continueWatching";
 
 const homeOptions = queryOptions({
@@ -15,6 +15,8 @@ const homeOptions = queryOptions({
   queryFn: fetchHome,
   staleTime: 10 * 60 * 1000,
 });
+
+const PAGE_SIZE = 20;
 
 export const Route = createFileRoute("/_authenticated/home")({
   loader: ({ context }) => context.queryClient.ensureQueryData(homeOptions),
@@ -24,18 +26,39 @@ export const Route = createFileRoute("/_authenticated/home")({
 function HomePage() {
   const { data } = useSuspenseQuery(homeOptions);
   const [cw, setCw] = useState<WatchProgress[]>([]);
+  const [visible, setVisible] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => setCw(getContinueWatching()), []);
 
-  const featured = data.featured[0] ?? data.recent[0];
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setVisible((v) => Math.min(v + PAGE_SIZE, data.recent.length));
+          }
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    io.observe(sentinelRef.current);
+    return () => io.disconnect();
+  }, [data.recent.length]);
+
+  const featuredItems = data.featured.length > 0 ? data.featured : data.recent.slice(0, 5);
+  const recentVisible = data.recent.slice(0, visible);
+  const hasMore = visible < data.recent.length;
 
   return (
     <div>
-      {featured ? (
-        <HeroBanner item={featured} />
+      {featuredItems.length > 0 ? (
+        <FeaturedCarousel items={featuredItems} />
       ) : (
         <div className="mx-4 mt-6 md:mx-8">
           <div className="glass rounded-3xl p-10 text-center">
-            <h1 className="font-display text-3xl font-bold">Welcome to SurfTG</h1>
+            <h1 className="font-display text-3xl font-bold">Welcome to OttFree</h1>
             <p className="mt-2 text-muted-foreground">Your library will appear here.</p>
           </div>
         </div>
@@ -66,7 +89,7 @@ function HomePage() {
       )}
 
       {data.channels.length > 0 && (
-        <Row title="Telegram Channels" subtitle="Browse your linked sources">
+        <Row title="OTT Sources" subtitle="Browse your linked libraries">
           {data.channels.map((c) => (
             <Link
               key={c.id}
@@ -98,13 +121,29 @@ function HomePage() {
       )}
 
       {data.recent.length > 0 && (
-        <Row title="Recently Added">
-          {data.recent.map((m) => (
-            <div key={m.id} className="w-52 shrink-0 snap-start md:w-60">
-              <MediaCard item={m} aspect="poster" />
+        <section className="mt-10 px-4 md:px-8">
+          <div className="mb-4 flex items-end justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold md:text-3xl">Recently Added</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Fresh across your OTT sources
+              </p>
             </div>
-          ))}
-        </Row>
+            <span className="text-xs text-muted-foreground">
+              {recentVisible.length} of {data.recent.length}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {recentVisible.map((m, i) => (
+              <MediaCard key={`${m.chatId}-${m.id}-${i}`} item={m} aspect="poster" />
+            ))}
+          </div>
+          {hasMore && (
+            <div ref={sentinelRef} className="mt-8 flex justify-center py-6">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
+            </div>
+          )}
+        </section>
       )}
     </div>
   );

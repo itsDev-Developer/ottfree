@@ -39,7 +39,9 @@ function ChannelPage() {
           <ChevronLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="font-display text-3xl font-bold md:text-4xl">Channel {channelId}</h1>
+          <h1 className="font-display text-3xl font-bold md:text-4xl">
+            {query.data?.items[0]?.channelName ?? `OTT ${channelId}`}
+          </h1>
           <p className="text-sm text-muted-foreground">Browse and stream</p>
         </div>
         <form
