@@ -150,14 +150,67 @@ function AdminPage() {
   );
 }
 
-function AdsSettingsCard() {
-  const [s, setS] = useState<AdsSettings>({ vastTagUrl: "", bannerImageUrl: "", bannerLink: "" });
-  useEffect(() => setS(getAdsSettings()), []);
+const SLOTS: { value: string; label: string }[] = [
+  { value: "preroll", label: "Video pre-roll (VAST)" },
+  { value: "home_top", label: "Home — top banner" },
+  { value: "watch_banner", label: "Watch — under player" },
+];
 
-  const save = () => {
-    setAdsSettings(s);
-    toast.success("Ad settings saved");
-  };
+interface AdDraft {
+  slot: string;
+  enabled: boolean;
+  image_url: string;
+  link_url: string;
+  vast_tag_url: string;
+  position: number;
+}
+
+const emptyDraft: AdDraft = {
+  slot: "home_top",
+  enabled: true,
+  image_url: "",
+  link_url: "",
+  vast_tag_url: "",
+  position: 0,
+};
+
+function AdsSettingsCard() {
+  const qc = useQueryClient();
+  const upsertFn = useServerFn(upsertAd);
+  const deleteFn = useServerFn(deleteAd);
+
+  const ads = useQuery<AdRow[]>({ queryKey: ["ads", "all"], queryFn: fetchAllAds });
+  const [draft, setDraft] = useState<AdDraft>(emptyDraft);
+
+  const save = useMutation({
+    mutationFn: async (d: AdDraft) => {
+      return upsertFn({
+        data: {
+          slot: d.slot,
+          enabled: d.enabled,
+          image_url: d.image_url || null,
+          link_url: d.link_url || null,
+          vast_tag_url: d.vast_tag_url || null,
+          position: d.position,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Ad saved");
+      setDraft(emptyDraft);
+      qc.invalidateQueries({ queryKey: ["ads"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to save ad"),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => deleteFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Ad removed");
+      qc.invalidateQueries({ queryKey: ["ads"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to delete"),
+  });
 
   return (
     <section className="glass rounded-3xl p-6 lg:col-span-2">
@@ -167,60 +220,108 @@ function AdsSettingsCard() {
         </div>
         <div>
           <h2 className="font-display text-lg font-bold">Advertising</h2>
-          <p className="text-xs text-muted-foreground">Configure VAST pre-roll and banner ads shown to viewers.</p>
+          <p className="text-xs text-muted-foreground">Manage VAST pre-roll and banner ads shared across all viewers.</p>
         </div>
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <label className="block md:col-span-2">
-          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            VAST Tag URL (video pre-roll)
-          </span>
-          <input
-            value={s.vastTagUrl}
-            onChange={(e) => setS({ ...s, vastTagUrl: e.target.value })}
-            placeholder="https://example.com/vast.xml"
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Slot</span>
+          <select
+            value={draft.slot}
+            onChange={(e) => setDraft({ ...draft, slot: e.target.value })}
             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
-          />
+          >
+            {SLOTS.map((s) => (
+              <option key={s.value} value={s.value} className="bg-background">
+                {s.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="block">
-          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Banner Image URL
-          </span>
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Position</span>
           <input
-            value={s.bannerImageUrl}
-            onChange={(e) => setS({ ...s, bannerImageUrl: e.target.value })}
-            placeholder="https://example.com/banner.jpg"
+            type="number"
+            value={draft.position}
+            onChange={(e) => setDraft({ ...draft, position: Number(e.target.value) || 0 })}
             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
           />
         </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Banner Click URL
-          </span>
-          <input
-            value={s.bannerLink}
-            onChange={(e) => setS({ ...s, bannerLink: e.target.value })}
-            placeholder="https://advertiser.com"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
-          />
-        </label>
+        {draft.slot === "preroll" ? (
+          <label className="block md:col-span-2">
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">VAST Tag URL</span>
+            <input
+              value={draft.vast_tag_url}
+              onChange={(e) => setDraft({ ...draft, vast_tag_url: e.target.value })}
+              placeholder="https://example.com/vast.xml"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+            />
+          </label>
+        ) : (
+          <>
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Banner Image URL</span>
+              <input
+                value={draft.image_url}
+                onChange={(e) => setDraft({ ...draft, image_url: e.target.value })}
+                placeholder="https://example.com/banner.jpg"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Click URL</span>
+              <input
+                value={draft.link_url}
+                onChange={(e) => setDraft({ ...draft, link_url: e.target.value })}
+                placeholder="https://advertiser.com"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+              />
+            </label>
+          </>
+        )}
       </div>
-
-      {s.bannerImageUrl && (
-        <div className="mt-4">
-          <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Banner preview</p>
-          <img src={s.bannerImageUrl} alt="Banner preview" className="max-h-40 rounded-xl border border-white/10 object-contain" />
-        </div>
-      )}
 
       <div className="mt-6 flex justify-end">
         <button
-          onClick={save}
-          className="gradient-primary flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+          onClick={() => save.mutate(draft)}
+          disabled={save.isPending}
+          className="gradient-primary flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
-          <Save className="h-4 w-4" /> Save ad settings
+          <Plus className="h-4 w-4" /> {save.isPending ? "Saving…" : "Add / update ad"}
         </button>
+      </div>
+
+      <div className="mt-8">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Current ads</h3>
+        {ads.isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : (ads.data ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">No ads configured yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {(ads.data ?? []).map((a) => (
+              <li key={a.id} className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm">
+                <span className="rounded-md bg-primary/20 px-2 py-0.5 text-xs font-semibold text-primary">
+                  {SLOTS.find((s) => s.value === a.slot)?.label ?? a.slot}
+                </span>
+                <span className="truncate text-muted-foreground">
+                  {a.vast_tag_url || a.image_url || a.link_url || "—"}
+                </span>
+                <span className="ml-auto flex items-center gap-2">
+                  <button
+                    onClick={() => remove.mutate(a.id)}
+                    className="rounded-full border border-white/10 bg-white/5 p-2 text-muted-foreground hover:text-destructive"
+                    aria-label="Delete ad"
+                  >
+                    <Save className="hidden" />
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );
