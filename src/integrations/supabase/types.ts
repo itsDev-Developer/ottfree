@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ads: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          image_url: string | null
+          link_url: string | null
+          position: number
+          slot: string
+          updated_at: string
+          vast_tag_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          position?: number
+          slot: string
+          updated_at?: string
+          vast_tag_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          position?: number
+          slot?: string
+          updated_at?: string
+          vast_tag_url?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
