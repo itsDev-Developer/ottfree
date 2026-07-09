@@ -1,9 +1,12 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { fetchSession } from "@/services/backend";
 import { getVisits, getPlays, clearAnalytics, type VisitEvent, type PlayEvent } from "@/store/analytics";
-import { getAdsSettings, setAdsSettings, type AdsSettings } from "@/store/adminSettings";
-import { Activity, Eye, Play, Users, Trash2, ChevronLeft, Megaphone, Save } from "lucide-react";
+import { fetchAllAds, type AdRow } from "@/lib/cloudSettings";
+import { upsertAd, deleteAd } from "@/lib/adminSettings.functions";
+import { Activity, Eye, Play, Users, Trash2, ChevronLeft, Megaphone, Save, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
