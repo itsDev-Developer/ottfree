@@ -4,12 +4,12 @@ import { useEffect } from "react";
 import { fetchWatch } from "@/services/backend";
 import { VideoPlayer } from "@/components/player/VideoPlayer";
 import { MediaCard } from "@/components/media/MediaCard";
+import { BannerAd } from "@/components/media/BannerAd";
 import { findProgress, saveProgress } from "@/store/continueWatching";
 import { trackPlay } from "@/store/analytics";
-import { getAdsSettings } from "@/store/adminSettings";
+import { fetchAdsBySlot } from "@/lib/cloudSettings";
 import { toast } from "sonner";
 import { Share2, Download, Link as LinkIcon, ChevronLeft } from "lucide-react";
-import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/watch/$chatId/$messageId/$hash")({
   component: WatchPage,
@@ -24,12 +24,17 @@ function WatchPage() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const preroll = useQuery({
+    queryKey: ["ads", "preroll"],
+    queryFn: () => fetchAdsBySlot("preroll"),
+    staleTime: 5 * 60 * 1000,
+  });
+  const vastTagUrl = preroll.data?.find((a) => a.vast_tag_url)?.vast_tag_url ?? undefined;
+
   const title = query.data?.title;
   useEffect(() => {
     if (title) trackPlay({ chatId, messageId, title });
   }, [chatId, messageId, title]);
-
-  const [ads] = useState(() => getAdsSettings());
 
   if (query.isLoading || !query.data) {
     return (
@@ -66,7 +71,7 @@ function WatchPage() {
         <Link to="/home" className="hover:text-foreground">Home</Link>
         <ChevronLeft className="h-3 w-3 rotate-180" />
         <Link to="/channel/$channelId" params={{ channelId: chatId }} className="hover:text-foreground">
-          Channel {chatId}
+          OTT {chatId}
         </Link>
         <ChevronLeft className="h-3 w-3 rotate-180" />
         <span className="line-clamp-1 text-foreground">{w.title}</span>
@@ -78,7 +83,7 @@ function WatchPage() {
             src={w.streamUrl}
             poster={w.thumbnail}
             startTime={progress?.position ?? 0}
-            vastTagUrl={ads.vastTagUrl || undefined}
+            vastTagUrl={vastTagUrl}
             onProgress={(position, duration) =>
               saveProgress({
                 chatId,
@@ -93,19 +98,7 @@ function WatchPage() {
             }
           />
 
-          {ads.bannerImageUrl && (
-            <a
-              href={ads.bannerLink || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 block overflow-hidden rounded-2xl border border-white/10"
-            >
-              <img src={ads.bannerImageUrl} alt="Sponsored" className="h-auto w-full object-cover" />
-              <span className="block bg-black/60 px-3 py-1 text-[10px] uppercase tracking-widest text-white/70">
-                Sponsored
-              </span>
-            </a>
-          )}
+          <BannerAd slot="watch_banner" className="!mx-0 mt-4" />
 
           <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
             <div>
