@@ -65,6 +65,10 @@ function HomePage() {
         </div>
       )}
 
+      <BannerAd slot="home_top" />
+
+
+
       {cw.length > 0 && (
         <Row title="Continue Watching">
           {cw.map((p) => (
