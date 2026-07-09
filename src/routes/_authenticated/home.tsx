@@ -4,6 +4,7 @@ import { fetchHome } from "@/services/backend";
 import { FeaturedCarousel } from "@/components/media/FeaturedCarousel";
 import { MediaCard } from "@/components/media/MediaCard";
 import { Row } from "@/components/media/Row";
+import { BannerAd } from "@/components/media/BannerAd";
 import { Link } from "@tanstack/react-router";
 import { Thumbnail } from "@/components/media/Thumbnail";
 import { getContinueWatching } from "@/store/continueWatching";

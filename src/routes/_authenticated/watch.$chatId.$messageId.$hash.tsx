@@ -135,7 +135,7 @@ function WatchPage() {
             <Info label="File" value={w.filename} />
             <Info label="Size" value={w.size ?? "—"} />
             <Info label="Resolution" value={w.resolution ?? "—"} />
-            <Info label="Channel" value={w.channelName ?? chatId} />
+            <Info label="OTT" value={w.channelName ?? chatId} />
           </div>
         </div>
 
