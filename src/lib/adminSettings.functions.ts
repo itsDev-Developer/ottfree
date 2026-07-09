@@ -63,7 +63,7 @@ export const upsertSiteSetting = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("site_settings")
-      .upsert({ key: data.key, value: data.value });
+      .upsert({ key: data.key, value: data.value as never });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
