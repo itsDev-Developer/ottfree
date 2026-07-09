@@ -141,18 +141,37 @@ export async function fetchHome(): Promise<HomeData> {
   const channels = (data.channels ?? []).map(channelToChannel);
   const folders = (data.playlists ?? []).map(playlistToFolder);
 
-  // Warm first channel for a featured hero + "recently added" strip.
-  let featured: MediaItem[] = [];
-  let recent: MediaItem[] = [];
-  if (channels[0]) {
-    try {
-      const first = await fetchChannel(channels[0].id, 1);
-      recent = first.items.slice(0, 20);
-      featured = first.items.slice(0, 5).map((m) => ({ ...m, channelName: channels[0].name }));
-    } catch {
-      /* ignore */
+  // Fan out across the top channels so Featured + Recently Added feel alive.
+  const top = channels.slice(0, 6);
+  const perChannel = await Promise.all(
+    top.map((c) =>
+      fetchChannel(c.id, 1)
+        .then((p) => p.items.map((m) => ({ ...m, channelName: c.name })))
+        .catch(() => [] as MediaItem[]),
+    ),
+  );
+
+  // Recently Added: interleave one item from each channel round-robin, so the
+  // grid isn't dominated by a single source.
+  const recent: MediaItem[] = [];
+  const seen = new Set<string>();
+  const maxLen = Math.max(0, ...perChannel.map((a) => a.length));
+  for (let i = 0; i < maxLen; i++) {
+    for (const arr of perChannel) {
+      const m = arr[i];
+      if (!m) continue;
+      const key = `${m.chatId}:${m.id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      recent.push(m);
     }
   }
+
+  // Featured: one item from each of the top channels (up to 6), poster-heavy.
+  const featured: MediaItem[] = perChannel
+    .map((arr) => arr.find((m) => !!m.thumbnail) ?? arr[0])
+    .filter((m): m is MediaItem => !!m)
+    .slice(0, 6);
 
   return { featured, channels, folders, recent, isAdmin: !!data.is_admin };
 }
