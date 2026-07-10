@@ -16,13 +16,24 @@ async function requireAdmin(): Promise<void> {
   if (!data.is_admin) throw new Error("Forbidden: admin only");
 }
 
+const optionalUrl = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine((s) => s === "" || /^https?:\/\//i.test(s), "Must be a URL")
+  .optional()
+  .nullable();
+
 const AdSchema = z.object({
   id: z.string().uuid().optional(),
   slot: z.string().min(1).max(64),
   enabled: z.boolean(),
-  image_url: z.string().url().nullable().optional(),
-  link_url: z.string().url().nullable().optional(),
-  vast_tag_url: z.string().url().nullable().optional(),
+  network: z.string().max(64).optional().nullable(),
+  label: z.string().max(120).optional().nullable(),
+  image_url: optionalUrl,
+  link_url: optionalUrl,
+  vast_tag_url: optionalUrl,
+  script_code: z.string().max(20000).optional().nullable(),
   position: z.number().int().min(0).default(0),
 });
 
@@ -36,7 +47,15 @@ export const upsertAd = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireAdmin();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const payload = { ...data, image_url: data.image_url || null, link_url: data.link_url || null, vast_tag_url: data.vast_tag_url || null };
+    const payload = {
+      ...data,
+      network: data.network || null,
+      label: data.label || null,
+      image_url: data.image_url || null,
+      link_url: data.link_url || null,
+      vast_tag_url: data.vast_tag_url || null,
+      script_code: data.script_code || null,
+    };
     const { data: row, error } = await supabaseAdmin
       .from("ads")
       .upsert(payload)

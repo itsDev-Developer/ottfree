@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
+import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
 import { fetchSession } from "@/services/backend";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -15,8 +16,10 @@ export const Route = createFileRoute("/_authenticated")({
     return { session };
   },
   component: () => (
-    <AppShell>
-      <Outlet />
-    </AppShell>
+    <MaintenanceGate>
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </MaintenanceGate>
   ),
 });
