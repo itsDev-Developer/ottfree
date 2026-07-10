@@ -35,6 +35,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {site.data?.header_html && (
+        <div
+          className="border-b border-white/10 bg-primary/10 px-4 py-2 text-center text-xs md:px-8"
+          dangerouslySetInnerHTML={{ __html: site.data.header_html }}
+        />
+      )}
       <header className="glass sticky top-0 z-40 flex h-16 items-center gap-4 px-4 md:px-8">
         <Link to="/home" className="flex items-center gap-2">
           {logoUrl ? (
