@@ -20,8 +20,11 @@ export type Database = {
           enabled: boolean
           id: string
           image_url: string | null
+          label: string | null
           link_url: string | null
+          network: string | null
           position: number
+          script_code: string | null
           slot: string
           updated_at: string
           vast_tag_url: string | null
@@ -31,8 +34,11 @@ export type Database = {
           enabled?: boolean
           id?: string
           image_url?: string | null
+          label?: string | null
           link_url?: string | null
+          network?: string | null
           position?: number
+          script_code?: string | null
           slot: string
           updated_at?: string
           vast_tag_url?: string | null
@@ -42,8 +48,11 @@ export type Database = {
           enabled?: boolean
           id?: string
           image_url?: string | null
+          label?: string | null
           link_url?: string | null
+          network?: string | null
           position?: number
+          script_code?: string | null
           slot?: string
           updated_at?: string
           vast_tag_url?: string | null
