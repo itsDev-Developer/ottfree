@@ -69,7 +69,7 @@ function LoginPage() {
             </h1>
             <p className="text-sm text-muted-foreground">Your Ott library, cinematically.</p>
             <div class="bg-red-950 border border-red-500 rounded-lg p-4 overflow-x-auto">
-              <code class="text-red-200 font-mono text-sm">&lt;p className="text-sm text-muted-foreground"&gt;Username: User, Password: User.&lt;/p&gt;
+              <code class="text-red-200 font-mono text-sm">Username: User, Password: User.
               </code>
             </div>
           </div>
