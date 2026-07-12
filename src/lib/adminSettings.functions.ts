@@ -12,6 +12,12 @@ async function requireAdmin(): Promise<void> {
     redirect: "manual",
   });
   if (!res.ok) throw new Error("Unauthorized");
+  const ct = res.headers.get("content-type") ?? "";
+  if (!ct.includes("application/json")) {
+    // The backend returned HTML (usually a login page). Treat as unauthenticated
+    // rather than crashing on JSON.parse — gives the UI a clear error to show.
+    throw new Error("Unauthorized: please sign in to the admin backend");
+  }
   const data = (await res.json().catch(() => ({}))) as { is_admin?: boolean };
   if (!data.is_admin) throw new Error("Forbidden: admin only");
 }
@@ -47,8 +53,11 @@ export const upsertAd = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireAdmin();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const payload = {
-      ...data,
+    // Strip `id: undefined` on inserts so Postgres/PostgREST generates a UUID
+    // rather than choking on an explicit undefined primary key.
+    const { id, ...rest } = data;
+    const payload: Record<string, unknown> = {
+      ...rest,
       network: data.network || null,
       label: data.label || null,
       image_url: data.image_url || null,
@@ -56,9 +65,10 @@ export const upsertAd = createServerFn({ method: "POST" })
       vast_tag_url: data.vast_tag_url || null,
       script_code: data.script_code || null,
     };
+    if (id) payload.id = id;
     const { data: row, error } = await supabaseAdmin
       .from("ads")
-      .upsert(payload)
+      .upsert(payload, { onConflict: "id" })
       .select()
       .single();
     if (error) throw new Error(error.message);
@@ -82,7 +92,7 @@ export const upsertSiteSetting = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("site_settings")
-      .upsert({ key: data.key, value: data.value as never });
+      .upsert({ key: data.key, value: data.value as never }, { onConflict: "key" });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
