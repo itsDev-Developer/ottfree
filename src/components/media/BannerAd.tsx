@@ -17,26 +17,38 @@ export function BannerAd({ slot, className = "" }: Props) {
   });
 
   if (dismissed) return null;
-  const ad = data?.find((a) => a.script_code || a.image_url);
-  if (!ad) return null;
+  // Render every enabled ad that has SOMETHING renderable: a script,
+  // an image, or a bare link (some networks use text-only referral links).
+  const ads = (data ?? []).filter(
+    (a) => a.enabled !== false && (a.script_code || a.image_url || a.link_url),
+  );
+  if (ads.length === 0) return null;
 
   return (
-    <div className={`relative mx-4 mt-6 md:mx-8 ${className}`}>
-      <span className="absolute left-3 top-3 z-10 rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/80">
-        Ad
-      </span>
-      <button
-        onClick={() => setDismissed(true)}
-        aria-label="Dismiss ad"
-        className="absolute right-3 top-3 z-10 rounded-full bg-black/70 p-1 text-white/80 hover:bg-black/90 hover:text-white"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-      {ad.script_code ? (
-        <ScriptAd ad={ad} />
-      ) : (
-        <ImageAd ad={ad} />
-      )}
+    <div className={`mx-4 mt-6 flex flex-col gap-4 md:mx-8 ${className}`}>
+      {ads.map((ad, i) => (
+        <div key={ad.id ?? `${slot}-${i}`} className="relative">
+          <span className="absolute left-3 top-3 z-10 rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/80">
+            Ad
+          </span>
+          {i === 0 && (
+            <button
+              onClick={() => setDismissed(true)}
+              aria-label="Dismiss ad"
+              className="absolute right-3 top-3 z-10 rounded-full bg-black/70 p-1 text-white/80 hover:bg-black/90 hover:text-white"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+          {ad.script_code ? (
+            <ScriptAd ad={ad} />
+          ) : ad.image_url ? (
+            <ImageAd ad={ad} />
+          ) : ad.link_url ? (
+            <LinkAd ad={ad} />
+          ) : null}
+        </div>
+      ))}
     </div>
   );
 }
@@ -55,6 +67,20 @@ function ImageAd({ ad }: { ad: AdRow }) {
       {img}
     </a>
   ) : img;
+}
+
+function LinkAd({ ad }: { ad: AdRow }) {
+  if (!ad.link_url) return null;
+  return (
+    <a
+      href={ad.link_url}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      className="flex min-h-[90px] w-full items-center justify-center rounded-2xl border border-white/10 bg-black/20 p-4 text-center text-sm font-medium text-white/90 hover:bg-black/30"
+    >
+      {ad.label ?? "Sponsored"}
+    </a>
+  );
 }
 
 /**
