@@ -123,12 +123,76 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     background-image:
-      radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--primary) 25%, transparent), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%);
+      radial-gradient(
+        1200px 600px at 10% -10%,
+        color-mix(in oklab, var(--primary) 25%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 500px at 110% 10%,
+        color-mix(in oklab, var(--accent) 22%, transparent),
+        transparent 60%
+      );
     background-attachment: fixed;
   }
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .ott-video-player.video-js {
+    background: #020617;
+    color: white;
+    font-family: var(--font-sans);
+  }
+
+  .ott-video-player .vjs-poster img {
+    object-fit: cover;
+    filter: saturate(1.05) contrast(1.04);
+  }
+
+  .ott-video-player .vjs-big-play-button {
+    width: 5rem;
+    height: 5rem;
+    margin-top: -2.5rem;
+    margin-left: -2.5rem;
+    border: 1px solid color-mix(in oklab, white 25%, transparent);
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    box-shadow: 0 24px 80px color-mix(in oklab, var(--primary) 35%, transparent);
+    transition:
+      transform 180ms ease,
+      filter 180ms ease;
+  }
+
+  .ott-video-player:hover .vjs-big-play-button {
+    transform: scale(1.06);
+    filter: brightness(1.08);
+  }
+
+  .ott-video-player .vjs-control-bar {
+    height: 4.25rem;
+    padding-inline: 0.75rem;
+    background: linear-gradient(to top, rgb(0 0 0 / 90%), rgb(0 0 0 / 38%), transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .ott-video-player .vjs-play-progress,
+  .ott-video-player .vjs-volume-level {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+  }
+
+  .ott-video-player .vjs-slider {
+    border-radius: 999px;
+    background: rgb(255 255 255 / 20%);
+  }
+
+  .ott-video-player .vjs-load-progress div {
+    background: rgb(255 255 255 / 18%);
   }
 }

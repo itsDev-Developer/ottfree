@@ -26,11 +26,16 @@ export const Route = createFileRoute("/_authenticated/home")({
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeOptions);
+  const [testAds, setTestAds] = useState(false);
   const [cw, setCw] = useState<WatchProgress[]>([]);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => setCw(getContinueWatching()), []);
+
+  useEffect(() => {
+    setTestAds(new URLSearchParams(window.location.search).get("testAds") === "1");
+  }, []);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -65,9 +70,13 @@ function HomePage() {
         </div>
       )}
 
-      <BannerAd slot="home_top" />
+      {testAds && (
+        <div className="mx-4 mt-4 rounded-2xl border border-yellow-400/30 bg-yellow-400/10 px-4 py-3 text-sm font-semibold text-yellow-100 md:mx-8">
+          Test ads mode is ON — display ad units are shown before live ads.
+        </div>
+      )}
 
-
+      <BannerAd slot="home_top" testMode={testAds} />
 
       {cw.length > 0 && (
         <Row title="Continue Watching">
@@ -92,6 +101,8 @@ function HomePage() {
           ))}
         </Row>
       )}
+
+      <BannerAd slot="home_mid" testMode={testAds} />
 
       {data.channels.length > 0 && (
         <Row title="OTT Sources" subtitle="Browse your linked libraries">
@@ -130,14 +141,13 @@ function HomePage() {
           <div className="mb-4 flex items-end justify-between">
             <div>
               <h2 className="font-display text-2xl font-bold md:text-3xl">Recently Added</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Fresh across your OTT sources
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">Fresh across your OTT sources</p>
             </div>
             <span className="text-xs text-muted-foreground">
               {recentVisible.length} of {data.recent.length}
             </span>
           </div>
+          <BannerAd slot="home_feed" className="!mx-0 !mt-0 mb-5" testMode={testAds} />
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {recentVisible.map((m, i) => (
               <MediaCard key={`${m.chatId}-${m.id}-${i}`} item={m} aspect="poster" />
