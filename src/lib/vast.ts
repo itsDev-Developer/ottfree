@@ -3,6 +3,8 @@
 
 export interface VastAd {
   mediaUrl: string;
+  mimeType?: string;
+  duration?: number;
   clickThrough?: string;
   impressions: string[];
   trackingEvents: Record<string, string[]>;
@@ -57,7 +59,8 @@ export async function loadVast(tagUrl: string, depth = 0): Promise<VastAd | null
     .map((n) => n.textContent?.trim() ?? "")
     .filter(Boolean);
 
-  const clickThrough = doc.querySelector("VideoClicks ClickThrough")?.textContent?.trim() || undefined;
+  const clickThrough =
+    doc.querySelector("VideoClicks ClickThrough")?.textContent?.trim() || undefined;
 
   const trackingEvents: Record<string, string[]> = {};
   linear.querySelectorAll("Tracking").forEach((n) => {
@@ -67,8 +70,17 @@ export async function loadVast(tagUrl: string, depth = 0): Promise<VastAd | null
   });
 
   const skipOffset = parseTime(linear.getAttribute("skipoffset"));
+  const duration = parseTime(linear.querySelector("Duration")?.textContent?.trim());
 
-  return { mediaUrl: mediaFiles[0].url, clickThrough, impressions, trackingEvents, skipOffset };
+  return {
+    mediaUrl: mediaFiles[0].url,
+    mimeType: mediaFiles[0].type || undefined,
+    duration,
+    clickThrough,
+    impressions,
+    trackingEvents,
+    skipOffset,
+  };
 }
 
 export function fireBeacons(urls: string[] | undefined) {

@@ -29,7 +29,7 @@ function WatchPage() {
     queryFn: () => fetchAdsBySlot("preroll"),
     staleTime: 5 * 60 * 1000,
   });
-  const vastTagUrl = preroll.data?.find((a) => a.vast_tag_url)?.vast_tag_url ?? undefined;
+  const vastTagUrls = (preroll.data ?? []).map((a) => a.vast_tag_url).filter(Boolean) as string[];
 
   const title = query.data?.title;
   useEffect(() => {
@@ -61,16 +61,24 @@ function WatchPage() {
     if (navigator.share) {
       try {
         await navigator.share({ title: w.title, url: window.location.href });
-      } catch {}
+      } catch {
+        // User cancelled native share sheet.
+      }
     } else copyLink();
   };
 
   return (
     <div className="px-4 py-6 md:px-8">
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/home" className="hover:text-foreground">Home</Link>
+        <Link to="/home" className="hover:text-foreground">
+          Home
+        </Link>
         <ChevronLeft className="h-3 w-3 rotate-180" />
-        <Link to="/channel/$channelId" params={{ channelId: chatId }} className="hover:text-foreground">
+        <Link
+          to="/channel/$channelId"
+          params={{ channelId: chatId }}
+          className="hover:text-foreground"
+        >
           OTT {chatId}
         </Link>
         <ChevronLeft className="h-3 w-3 rotate-180" />
@@ -83,7 +91,7 @@ function WatchPage() {
             src={w.streamUrl}
             poster={w.thumbnail}
             startTime={progress?.position ?? 0}
-            vastTagUrl={vastTagUrl}
+            vastTagUrls={vastTagUrls}
             onProgress={(position, duration) =>
               saveProgress({
                 chatId,
