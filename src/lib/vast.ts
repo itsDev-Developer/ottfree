@@ -6,6 +6,7 @@ export interface VastAd {
   mimeType?: string;
   duration?: number;
   clickThrough?: string;
+  label?: string;
   impressions: string[];
   trackingEvents: Record<string, string[]>;
   skipOffset?: number; // seconds

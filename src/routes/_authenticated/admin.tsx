@@ -3,7 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { fetchSession } from "@/services/backend";
-import { getVisits, getPlays, clearAnalytics, type VisitEvent, type PlayEvent } from "@/store/analytics";
+import {
+  getVisits,
+  getPlays,
+  clearAnalytics,
+  type VisitEvent,
+  type PlayEvent,
+} from "@/store/analytics";
 import {
   fetchAllAds,
   fetchSiteSettings,
@@ -14,8 +20,20 @@ import {
 } from "@/lib/cloudSettings";
 import { upsertAd, deleteAd, upsertSiteSetting } from "@/lib/adminSettings.functions";
 import {
-  Activity, Eye, Play, Users, Trash2, ChevronLeft, Megaphone, Plus,
-  BarChart3, Palette, Wrench, LayoutDashboard, Save, ExternalLink,
+  Activity,
+  Eye,
+  Play,
+  Users,
+  Trash2,
+  ChevronLeft,
+  Megaphone,
+  Plus,
+  BarChart3,
+  Palette,
+  Wrench,
+  LayoutDashboard,
+  Save,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,11 +53,26 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 type Tab = "overview" | "ads" | "site" | "maintenance";
 
-const TABS: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard, description: "Visits and playback statistics" },
+const TABS: {
+  id: Tab;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+}[] = [
+  {
+    id: "overview",
+    label: "Overview",
+    icon: LayoutDashboard,
+    description: "Visits and playback statistics",
+  },
   { id: "ads", label: "Ads", icon: Megaphone, description: "Manage ad slots & networks" },
   { id: "site", label: "Site", icon: Palette, description: "Branding, header & footer" },
-  { id: "maintenance", label: "Maintenance", icon: Wrench, description: "Take the site offline for viewers" },
+  {
+    id: "maintenance",
+    label: "Maintenance",
+    icon: Wrench,
+    description: "Take the site offline for viewers",
+  },
 ];
 
 function AdminPage() {
@@ -137,7 +170,10 @@ function OverviewSection() {
     <div>
       <div className="mb-4 flex justify-end">
         <button
-          onClick={() => { clearAnalytics(); setTick((t) => t + 1); }}
+          onClick={() => {
+            clearAnalytics();
+            setTick((t) => t + 1);
+          }}
           className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
         >
           <Trash2 className="h-4 w-4" /> Reset data
@@ -145,8 +181,16 @@ function OverviewSection() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={<Eye className="h-5 w-5" />} label="Visits (24h)" value={stats.last24Visits} />
-        <StatCard icon={<Activity className="h-5 w-5" />} label="Visits (7d)" value={stats.last7Visits} />
+        <StatCard
+          icon={<Eye className="h-5 w-5" />}
+          label="Visits (24h)"
+          value={stats.last24Visits}
+        />
+        <StatCard
+          icon={<Activity className="h-5 w-5" />}
+          label="Visits (7d)"
+          value={stats.last7Visits}
+        />
         <StatCard icon={<Users className="h-5 w-5" />} label="Sessions" value={stats.sessions} />
         <StatCard icon={<Play className="h-5 w-5" />} label="Plays" value={plays.length} />
       </div>
@@ -163,7 +207,10 @@ function OverviewSection() {
                 <div className="flex h-full w-full items-end">
                   <div
                     className="gradient-primary w-full rounded-t-md transition-all"
-                    style={{ height: `${(d.count / stats.maxDay) * 100}%`, minHeight: d.count ? 4 : 0 }}
+                    style={{
+                      height: `${(d.count / stats.maxDay) * 100}%`,
+                      minHeight: d.count ? 4 : 0,
+                    }}
                     title={`${d.count} visits`}
                   />
                 </div>
@@ -181,7 +228,10 @@ function OverviewSection() {
               <li className="text-sm text-muted-foreground">No visits recorded yet.</li>
             )}
             {stats.topPaths.map(([path, count]) => (
-              <li key={path} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm">
+              <li
+                key={path}
+                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm"
+              >
                 <span className="truncate font-mono text-xs text-muted-foreground">{path}</span>
                 <span className="font-semibold">{count}</span>
               </li>
@@ -196,7 +246,10 @@ function OverviewSection() {
               <li className="text-sm text-muted-foreground">No playback recorded yet.</li>
             )}
             {stats.topPlays.map((p, i) => (
-              <li key={i} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm">
+              <li
+                key={i}
+                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm"
+              >
                 <span className="truncate">{p.title}</span>
                 <span className="font-semibold">{p.count} plays</span>
               </li>
@@ -211,20 +264,57 @@ function OverviewSection() {
 /* -------------------- Ads -------------------- */
 
 const SLOTS: { value: string; label: string; description: string }[] = [
-  { value: "preroll", label: "Video pre-roll (VAST)", description: "Shown before video playback starts" },
+  {
+    value: "preroll",
+    label: "Video pre-roll (VAST)",
+    description: "Shown before video playback starts",
+  },
   { value: "home_top", label: "Home — top banner", description: "Under the featured carousel" },
+  {
+    value: "home_mid",
+    label: "Home — mid-page banner",
+    description: "Between Continue Watching and OTT Sources",
+  },
+  { value: "home_feed", label: "Home — feed banner", description: "Above the Recently Added grid" },
+  { value: "watch_top", label: "Watch — top banner", description: "Above the video player" },
   { value: "watch_banner", label: "Watch — under player", description: "Below the video player" },
-  { value: "sidebar", label: "Sidebar / Related", description: "Beside related content" },
+  { value: "watch_sidebar", label: "Watch — sidebar", description: "Above related videos" },
+  { value: "sidebar", label: "Sidebar / Related", description: "Legacy sidebar placement" },
 ];
 
 type AdType = "vast" | "image" | "script";
 
 const NETWORKS: { value: string; label: string; type: AdType; hint: string }[] = [
-  { value: "adsterra", label: "Adsterra", type: "script", hint: "Paste the script snippet from your Adsterra ad zone." },
-  { value: "hilltopads", label: "Hilltopads", type: "script", hint: "Paste the ad tag JavaScript from your Hilltopads zone." },
-  { value: "propellerads", label: "PropellerAds", type: "script", hint: "Paste the tag script from PropellerAds." },
-  { value: "custom_script", label: "Custom script / HTML", type: "script", hint: "Paste any HTML+JS ad snippet." },
-  { value: "image", label: "Image banner", type: "image", hint: "Upload/host your own creative and paste the image URL." },
+  {
+    value: "adsterra",
+    label: "Adsterra",
+    type: "script",
+    hint: "Paste the script snippet from your Adsterra ad zone.",
+  },
+  {
+    value: "hilltopads",
+    label: "Hilltopads",
+    type: "script",
+    hint: "Paste the ad tag JavaScript from your Hilltopads zone.",
+  },
+  {
+    value: "propellerads",
+    label: "PropellerAds",
+    type: "script",
+    hint: "Paste the tag script from PropellerAds.",
+  },
+  {
+    value: "custom_script",
+    label: "Custom script / HTML",
+    type: "script",
+    hint: "Paste any HTML+JS ad snippet.",
+  },
+  {
+    value: "image",
+    label: "Image banner",
+    type: "image",
+    hint: "Upload/host your own creative and paste the image URL.",
+  },
   { value: "vast", label: "VAST tag", type: "vast", hint: "Paste the VAST XML endpoint URL." },
 ];
 
@@ -329,11 +419,10 @@ function AdsSection() {
             <Megaphone className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-display text-lg font-bold">
-              {editing ? "Edit ad" : "New ad"}
-            </h2>
+            <h2 className="font-display text-lg font-bold">{editing ? "Edit ad" : "New ad"}</h2>
             <p className="text-xs text-muted-foreground">
-              Supports Adsterra, Hilltopads, PropellerAds, custom scripts, image banners and VAST pre-roll.
+              Supports Adsterra, Hilltopads, PropellerAds, custom scripts, image banners and VAST
+              pre-roll.
             </p>
           </div>
         </div>
@@ -346,7 +435,9 @@ function AdsSection() {
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
             >
               {NETWORKS.map((n) => (
-                <option key={n.value} value={n.value} className="bg-background">{n.label}</option>
+                <option key={n.value} value={n.value} className="bg-background">
+                  {n.label}
+                </option>
               ))}
             </select>
           </Field>
@@ -359,7 +450,9 @@ function AdsSection() {
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60 disabled:opacity-70"
             >
               {SLOTS.map((s) => (
-                <option key={s.value} value={s.value} className="bg-background">{s.label}</option>
+                <option key={s.value} value={s.value} className="bg-background">
+                  {s.label}
+                </option>
               ))}
             </select>
           </Field>
@@ -468,7 +561,8 @@ function AdsSection() {
           <ul className="mt-4 space-y-2">
             {(ads.data ?? []).map((a) => {
               const slotLabel = SLOTS.find((s) => s.value === a.slot)?.label ?? a.slot;
-              const networkLabel = NETWORKS.find((n) => n.value === a.network)?.label ?? a.network ?? "Custom";
+              const networkLabel =
+                NETWORKS.find((n) => n.value === a.network)?.label ?? a.network ?? "Custom";
               return (
                 <li
                   key={a.id}
@@ -478,10 +572,7 @@ function AdsSection() {
                       : "border-white/5 bg-white/5 hover:border-white/20"
                   }`}
                 >
-                  <button
-                    onClick={() => startEdit(a)}
-                    className="flex-1 text-left"
-                  >
+                  <button onClick={() => startEdit(a)} className="flex-1 text-left">
                     <div className="flex items-center gap-2">
                       <span className="rounded-md bg-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
                         {networkLabel}
@@ -498,7 +589,9 @@ function AdsSection() {
                     </p>
                   </button>
                   <button
-                    onClick={() => { if (confirm("Delete this ad?")) remove.mutate(a.id); }}
+                    onClick={() => {
+                      if (confirm("Delete this ad?")) remove.mutate(a.id);
+                    }}
                     className="rounded-full border border-white/10 bg-white/5 p-2 text-muted-foreground hover:text-destructive"
                     aria-label="Delete ad"
                   >
@@ -510,13 +603,44 @@ function AdsSection() {
           </ul>
         )}
 
+        <div className="mt-6 rounded-2xl border border-yellow-400/20 bg-yellow-400/10 p-4 text-xs text-yellow-100">
+          <p className="font-semibold uppercase tracking-wider text-yellow-200">Test ad display</p>
+          <p className="mt-1 text-yellow-100/80">
+            Open pages with <code>?testAds=1</code> to verify display units and the non-skippable
+            test VAST preroll without saving real network tags.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href="/home?testAds=1"
+              className="rounded-full bg-yellow-300 px-3 py-1.5 text-xs font-black text-black hover:bg-yellow-200"
+            >
+              Test home ads
+            </a>
+            <button
+              type="button"
+              onClick={() =>
+                toast.info(
+                  "Open any video and add ?testAds=1 to the URL to test the VAST preroll and watch-page units.",
+                )
+              }
+              className="rounded-full border border-yellow-300/30 px-3 py-1.5 text-xs font-bold text-yellow-100 hover:bg-yellow-300/10"
+            >
+              How to test VAST
+            </button>
+          </div>
+        </div>
+
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-muted-foreground">
-          <p className="mb-2 font-semibold uppercase tracking-wider text-foreground">Where do these appear?</p>
+          <p className="mb-2 font-semibold uppercase tracking-wider text-foreground">
+            Where do these appear?
+          </p>
           <ul className="space-y-1">
             {SLOTS.map((s) => (
               <li key={s.value} className="flex gap-2">
                 <span className="text-primary">•</span>
-                <span><b className="text-foreground">{s.label}:</b> {s.description}</span>
+                <span>
+                  <b className="text-foreground">{s.label}:</b> {s.description}
+                </span>
               </li>
             ))}
           </ul>
@@ -538,11 +662,7 @@ function SiteSection() {
   useEffect(() => {
     if (site.data) {
       setDraft(site.data);
-      setSocialsRaw(
-        (site.data.social_links ?? [])
-          .map((s) => `${s.label} | ${s.url}`)
-          .join("\n"),
-      );
+      setSocialsRaw((site.data.social_links ?? []).map((s) => `${s.label} | ${s.url}`).join("\n"));
     }
   }, [site.data]);
 
@@ -623,7 +743,11 @@ function SiteSection() {
             />
           </Field>
 
-          <Field label="Header HTML (optional banner)" span={2} hint="Rendered above the site header. Leave blank to hide.">
+          <Field
+            label="Header HTML (optional banner)"
+            span={2}
+            hint="Rendered above the site header. Leave blank to hide."
+          >
             <textarea
               value={draft.header_html ?? ""}
               onChange={(e) => set("header_html", e.target.value)}
@@ -652,7 +776,11 @@ function SiteSection() {
             />
           </Field>
 
-          <Field label="Social links" span={2} hint="One per line, in the form `Label | https://url`">
+          <Field
+            label="Social links"
+            span={2}
+            hint="One per line, in the form `Label | https://url`"
+          >
             <textarea
               value={socialsRaw}
               onChange={(e) => setSocialsRaw(e.target.value)}
@@ -684,13 +812,9 @@ function SiteSection() {
             ) : (
               <div className="gradient-primary h-8 w-8 rounded-lg" />
             )}
-            <span className="font-display text-lg font-bold">
-              {draft.site_name || "OttFree"}
-            </span>
+            <span className="font-display text-lg font-bold">{draft.site_name || "OttFree"}</span>
           </div>
-          {draft.tagline && (
-            <p className="text-sm text-muted-foreground">{draft.tagline}</p>
-          )}
+          {draft.tagline && <p className="text-sm text-muted-foreground">{draft.tagline}</p>}
           {draft.hero_image_url && (
             <img
               src={draft.hero_image_url}
@@ -718,10 +842,15 @@ function SiteSection() {
 function MaintenanceSection() {
   const qc = useQueryClient();
   const upsertFn = useServerFn(upsertSiteSetting);
-  const current = useQuery({ queryKey: ["site-settings", "maintenance"], queryFn: fetchMaintenanceSettings });
+  const current = useQuery({
+    queryKey: ["site-settings", "maintenance"],
+    queryFn: fetchMaintenanceSettings,
+  });
   const [draft, setDraft] = useState<MaintenanceSettings>({});
 
-  useEffect(() => { if (current.data) setDraft(current.data); }, [current.data]);
+  useEffect(() => {
+    if (current.data) setDraft(current.data);
+  }, [current.data]);
 
   const save = useMutation({
     mutationFn: async (value: MaintenanceSettings) =>
@@ -745,7 +874,8 @@ function MaintenanceSection() {
           <div>
             <h2 className="font-display text-lg font-bold">Maintenance mode</h2>
             <p className="text-xs text-muted-foreground">
-              When ON, non-admin viewers see a maintenance page instead of the site. Admins still have full access.
+              When ON, non-admin viewers see a maintenance page instead of the site. Admins still
+              have full access.
             </p>
           </div>
         </div>
@@ -850,8 +980,16 @@ function MaintenanceSection() {
 /* -------------------- Shared -------------------- */
 
 function Field({
-  label, hint, span = 1, children,
-}: { label: string; hint?: string; span?: 1 | 2; children: React.ReactNode }) {
+  label,
+  hint,
+  span = 1,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  span?: 1 | 2;
+  children: React.ReactNode;
+}) {
   return (
     <label className={`block ${span === 2 ? "md:col-span-2" : ""}`}>
       <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
