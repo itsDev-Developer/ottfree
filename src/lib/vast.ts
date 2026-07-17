@@ -22,7 +22,10 @@ function parseTime(t?: string | null): number | undefined {
 }
 
 async function fetchXml(url: string): Promise<Document> {
-  const res = await fetch(url, { credentials: "omit" });
+  // Most VAST endpoints do not send CORS headers. Fetching through our same-
+  // origin server route makes configured third-party tags usable in browsers.
+  const target = new URL(url, window.location.href).href;
+  const res = await fetch(`/api/vast?url=${encodeURIComponent(target)}`, { credentials: "omit" });
   if (!res.ok) throw new Error(`VAST request failed with ${res.status}`);
   const text = await res.text();
   const doc = new DOMParser().parseFromString(text, "application/xml");
