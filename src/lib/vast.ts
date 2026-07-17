@@ -3,6 +3,8 @@
 
 export interface VastAd {
   mediaUrl: string;
+  /** Ordered fallbacks for the creative. A VAST response can contain several encodes. */
+  mediaUrls: Array<{ url: string; mimeType?: string }>;
   mimeType?: string;
   duration?: number;
   clickThrough?: string;
@@ -20,9 +22,23 @@ function parseTime(t?: string | null): number | undefined {
 }
 
 async function fetchXml(url: string): Promise<Document> {
-  const res = await fetch(url, { credentials: "omit" });
+  // Most VAST endpoints do not send CORS headers. Fetching through our same-
+  // origin server route makes configured third-party tags usable in browsers.
+  const target = new URL(url, window.location.href).href;
+  const res = await fetch(`/api/vast?url=${encodeURIComponent(target)}`, { credentials: "omit" });
+  if (!res.ok) throw new Error(`VAST request failed with ${res.status}`);
   const text = await res.text();
-  return new DOMParser().parseFromString(text, "application/xml");
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.querySelector("parsererror")) throw new Error("VAST response is not valid XML");
+  return doc;
+}
+
+function absoluteUrl(value: string, baseUrl: string): string {
+  try {
+    return new URL(value, baseUrl).href;
+  } catch {
+    return value;
+  }
 }
 
 export async function loadVast(tagUrl: string, depth = 0): Promise<VastAd | null> {
@@ -31,7 +47,7 @@ export async function loadVast(tagUrl: string, depth = 0): Promise<VastAd | null
   // Wrapper — follow VASTAdTagURI
   const wrapperUri = doc.querySelector("Wrapper VASTAdTagURI")?.textContent?.trim();
   if (wrapperUri) {
-    const inner = await loadVast(wrapperUri, depth + 1);
+    const inner = await loadVast(absoluteUrl(wrapperUri, tagUrl), depth + 1);
     if (inner) {
       // merge trackers/impressions from wrapper
       const impressions = [
@@ -48,13 +64,26 @@ export async function loadVast(tagUrl: string, depth = 0): Promise<VastAd | null
 
   const mediaFiles = Array.from(linear.querySelectorAll("MediaFile"))
     .map((n) => ({
-      url: n.textContent?.trim() ?? "",
+      url: absoluteUrl(n.textContent?.trim() ?? "", tagUrl),
       type: n.getAttribute("type") ?? "",
       width: Number(n.getAttribute("width") ?? 0),
+      bitrate: Number(n.getAttribute("bitrate") ?? 0),
     }))
-    .filter((m) => m.url && /mp4|webm/i.test(m.type));
+    // Do not reject a valid creative solely because an ad server omitted type.
+    .filter((m) => m.url && (!m.type || /video\/(mp4|webm|ogg)/i.test(m.type)));
   if (!mediaFiles.length) return null;
-  mediaFiles.sort((a, b) => b.width - a.width);
+  // Prefer broadly-supported MP4 files and modest bitrates. Keep every option as
+  // a fallback because an individual encode may not be playable on a device.
+  mediaFiles.sort(
+    (a, b) =>
+      Number(/mp4/i.test(b.type)) - Number(/mp4/i.test(a.type)) ||
+      a.bitrate - b.bitrate ||
+      a.width - b.width,
+  );
+  const mediaUrls = mediaFiles.map((media) => ({
+    url: media.url,
+    mimeType: media.type || undefined,
+  }));
 
   const impressions = Array.from(doc.querySelectorAll("Impression"))
     .map((n) => n.textContent?.trim() ?? "")
@@ -74,8 +103,9 @@ export async function loadVast(tagUrl: string, depth = 0): Promise<VastAd | null
   const duration = parseTime(linear.querySelector("Duration")?.textContent?.trim());
 
   return {
-    mediaUrl: mediaFiles[0].url,
-    mimeType: mediaFiles[0].type || undefined,
+    mediaUrl: mediaUrls[0].url,
+    mediaUrls,
+    mimeType: mediaUrls[0].mimeType,
     duration,
     clickThrough,
     impressions,

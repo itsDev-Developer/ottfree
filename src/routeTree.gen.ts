@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiVastRouteImport } from './routes/api/vast'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -32,6 +33,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVastRoute = ApiVastRouteImport.update({
+  id: '/api/vast',
+  path: '/api/vast',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/search': typeof AuthenticatedSearchRoute
+  '/api/vast': typeof ApiVastRoute
   '/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
   '/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
   '/api/proxy/$': typeof ApiProxySplatRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/search': typeof AuthenticatedSearchRoute
+  '/api/vast': typeof ApiVastRoute
   '/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
   '/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
   '/api/proxy/$': typeof ApiProxySplatRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
+  '/api/vast': typeof ApiVastRoute
   '/_authenticated/channel/$channelId': typeof AuthenticatedChannelChannelIdRoute
   '/_authenticated/folder/$folderId': typeof AuthenticatedFolderFolderIdRoute
   '/api/proxy/$': typeof ApiProxySplatRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/home'
     | '/search'
+    | '/api/vast'
     | '/channel/$channelId'
     | '/folder/$folderId'
     | '/api/proxy/$'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/home'
     | '/search'
+    | '/api/vast'
     | '/channel/$channelId'
     | '/folder/$folderId'
     | '/api/proxy/$'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/home'
     | '/_authenticated/search'
+    | '/api/vast'
     | '/_authenticated/channel/$channelId'
     | '/_authenticated/folder/$folderId'
     | '/api/proxy/$'
@@ -149,6 +161,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiVastRoute: typeof ApiVastRoute
   ApiProxySplatRoute: typeof ApiProxySplatRoute
 }
 
@@ -173,6 +186,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/vast': {
+      id: '/api/vast'
+      path: '/api/vast'
+      fullPath: '/api/vast'
+      preLoaderRoute: typeof ApiVastRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/search': {
@@ -254,6 +274,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiVastRoute: ApiVastRoute,
   ApiProxySplatRoute: ApiProxySplatRoute,
 }
 export const routeTree = rootRouteImport

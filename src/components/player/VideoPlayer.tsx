@@ -35,6 +35,12 @@ const emptyAdState: AdState = {
 
 const TEST_VAST_AD: VastAd = {
   mediaUrl: "https://storage.googleapis.com/interactive-media-ads/media/android.mp4",
+  mediaUrls: [
+    {
+      url: "https://storage.googleapis.com/interactive-media-ads/media/android.mp4",
+      mimeType: "video/mp4",
+    },
+  ],
   mimeType: "video/mp4",
   duration: 10,
   clickThrough: "https://lovable.dev",
@@ -95,6 +101,9 @@ export function VideoPlayer({
     let adStarted = false;
     let currentAd: VastAd | null = null;
     let quartileFired = new Set<string>();
+    let lastAdTime = 0;
+    let adHasStarted = false;
+    let mutedBeforeAd = false;
     let disposed = false;
     const activeTags = tagKey ? tagKey.split("\n") : [];
 
@@ -103,6 +112,7 @@ export function VideoPlayer({
       isAdPlayingRef.current = false;
       setAdState(emptyAdState);
       player.controls(true);
+      player.muted(mutedBeforeAd);
       player.src({ src, type: "video/mp4" });
       player.one("loadedmetadata", () => {
         if (startTime > 0 && startTime < (player.duration() ?? 0) - 5) {
@@ -115,21 +125,22 @@ export function VideoPlayer({
     const playOneAd = (ad: VastAd, index: number, total: number, onDone: () => void) => {
       currentAd = ad;
       quartileFired = new Set();
+      lastAdTime = 0;
+      adHasStarted = false;
       isAdPlayingRef.current = true;
       player.controls(false);
-      player.src({ src: ad.mediaUrl, type: ad.mimeType || "video/mp4" });
-      fireBeacons(ad.impressions);
-      fireBeacons(ad.trackingEvents.creativeView);
-      fireBeacons(ad.trackingEvents.start);
 
       const cleanup = () => {
         player.off("timeupdate", onAdTime);
+        player.off("playing", onAdPlaying);
+        player.off("seeking", preventAdSeek);
         player.off("ended", onAdEnded);
         player.off("error", onAdError);
       };
 
       const onAdTime = () => {
         const t = player.currentTime() ?? 0;
+        lastAdTime = Math.max(lastAdTime, t);
         const d = player.duration() || currentAd?.duration || 0;
         setAdState({
           playing: true,
@@ -156,21 +167,66 @@ export function VideoPlayer({
         }
       };
 
+      const onAdPlaying = () => {
+        if (adHasStarted) return;
+        adHasStarted = true;
+        fireBeacons(ad.impressions);
+        fireBeacons(ad.trackingEvents.creativeView);
+        fireBeacons(ad.trackingEvents.start);
+      };
+
+      const preventAdSeek = () => {
+        const requestedTime = player.currentTime() ?? 0;
+        if (requestedTime > lastAdTime + 1) player.currentTime(lastAdTime);
+      };
+
       const onAdEnded = () => {
         fireBeacons(ad.trackingEvents.complete);
         cleanup();
         onDone();
       };
 
+      let mediaIndex = 0;
+      const mediaSources = ad.mediaUrls.length
+        ? ad.mediaUrls
+        : [{ url: ad.mediaUrl, mimeType: ad.mimeType }];
+
       const onAdError = () => {
+        mediaIndex += 1;
+        if (mediaIndex < mediaSources.length) {
+          player.src({
+            src: mediaSources[mediaIndex].url,
+            type: mediaSources[mediaIndex].mimeType || "video/mp4",
+          });
+          void startAdPlayback();
+          return;
+        }
         fireBeacons(ad.trackingEvents.error);
         cleanup();
         onDone();
       };
 
+      const startAdPlayback = async () => {
+        try {
+          await player.play();
+        } catch {
+          // The VAST fetch is asynchronous, so the original click may no longer
+          // count as a user gesture. Retrying muted lets the creative display
+          // rather than being silently skipped by autoplay policy.
+          player.muted(true);
+          try {
+            await player.play();
+          } catch {
+            onAdError();
+          }
+        }
+      };
+
       player.on("timeupdate", onAdTime);
+      player.on("playing", onAdPlaying);
+      player.on("seeking", preventAdSeek);
       player.one("ended", onAdEnded);
-      player.one("error", onAdError);
+      player.on("error", onAdError);
       setAdState({
         playing: true,
         loading: false,
@@ -180,12 +236,17 @@ export function VideoPlayer({
         clickThrough: ad.clickThrough,
         label: ad.label,
       });
-      player.play()?.catch(() => {});
+      player.src({
+        src: mediaSources[mediaIndex].url,
+        type: mediaSources[mediaIndex].mimeType || "video/mp4",
+      });
+      void startAdPlayback();
     };
 
     const playAdsThenContent = async () => {
       if (adStarted) return;
       adStarted = true;
+      mutedBeforeAd = player.muted();
       setAdState({ ...emptyAdState, loading: true });
       player.controls(false);
 
