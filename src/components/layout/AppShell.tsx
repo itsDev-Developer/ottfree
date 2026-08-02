@@ -1,10 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, Tv, LogOut, Menu, Shield } from "lucide-react";
+import { Home, Search, Tv, LogOut, Shield } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchSession, logout } from "@/services/backend";
 import { fetchSiteSettings } from "@/lib/cloudSettings";
 import { motion } from "framer-motion";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import { trackVisit } from "@/store/analytics";
 import { SiteFooter } from "./SiteFooter";
 
@@ -19,6 +19,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const session = useQuery({ queryKey: ["session"], queryFn: fetchSession, staleTime: 60_000 });
   const site = useQuery({ queryKey: ["site-settings"], queryFn: fetchSiteSettings, staleTime: 5 * 60 * 1000 });
   const isAdmin = !!session.data?.isAdmin;
+
+  const mobileNav = useMemo(
+    () => (isAdmin ? [...navItems, { to: "/admin", label: "Admin", icon: Shield }] : navItems),
+    [isAdmin],
+  );
+
 
   const siteName = site.data?.site_name || "OttFree";
   const logoUrl = site.data?.logo_url;
