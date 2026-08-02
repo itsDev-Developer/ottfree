@@ -146,8 +146,8 @@ function HomePage() {
             ))}
           </div>
           {hasMore && (
-            <div ref={sentinelRef} className="mt-8 flex justify-center py-6">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
+            <div ref={sentinelRef} className="mt-8">
+              <GridSkeleton count={6} />
             </div>
           )}
         </section>
