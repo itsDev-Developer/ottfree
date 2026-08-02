@@ -6,9 +6,19 @@ interface Props {
   alt: string;
   className?: string;
   aspect?: "video" | "poster" | "square";
+  /** Set on above-the-fold imagery so the browser fetches it immediately. */
+  priority?: boolean;
+  sizes?: string;
 }
 
-export function Thumbnail({ src, alt, className = "", aspect = "video" }: Props) {
+export function Thumbnail({
+  src,
+  alt,
+  className = "",
+  aspect = "video",
+  priority = false,
+  sizes = "(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 45vw",
+}: Props) {
   const [errored, setErrored] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const ratio =
@@ -20,21 +30,24 @@ export function Thumbnail({ src, alt, className = "", aspect = "video" }: Props)
         <img
           src={src}
           alt={alt}
-          loading="lazy"
+          sizes={sizes}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "low"}
           decoding="async"
+          draggable={false}
           onLoad={() => setLoaded(true)}
           onError={() => setErrored(true)}
-          className={`h-full w-full object-cover transition-all duration-500 ${
-            loaded ? "scale-100 opacity-100" : "scale-105 opacity-0"
+          className={`h-full w-full object-cover transition-opacity duration-300 ${
+            loaded ? "opacity-100" : "opacity-0"
           }`}
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center gradient-primary opacity-40">
+        <div className="gradient-primary flex h-full w-full items-center justify-center opacity-40">
           <Film className="h-10 w-10 text-white/70" />
         </div>
       )}
       {!loaded && !errored && (
-        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-white/5 to-transparent" />
+        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-white/8 to-transparent" />
       )}
     </div>
   );

@@ -68,7 +68,7 @@ export const upsertAd = createServerFn({ method: "POST" })
     if (id) payload.id = id;
     const { data: row, error } = await supabaseAdmin
       .from("ads")
-      .upsert(payload, { onConflict: "id" })
+      .upsert(payload as never, { onConflict: "id" })
       .select()
       .single();
     if (error) throw new Error(error.message);
