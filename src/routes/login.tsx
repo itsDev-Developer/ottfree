@@ -59,20 +59,25 @@ function LoginPage() {
         transition={{ duration: 0.5 }}
         className="glass w-full max-w-md rounded-3xl p-8 shadow-2xl"
       >
-        <div className="mb-6 flex items-center gap-3">
-          <div className="gradient-primary flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg shadow-primary/40">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="gradient-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg shadow-primary/40">
             <Tv className="h-6 w-6 text-white" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h1 className="font-display text-2xl font-bold">
               Sign in to <span className="text-gradient">OttFree</span>
             </h1>
             <p className="text-sm text-muted-foreground">Your Ott library, cinematically.</p>
-            <div class="bg-red-950 border border-red-500 rounded-lg p-4 overflow-x-auto">
-              <code class="text-red-200 font-mono text-sm">Username: User, Password: User.
-              </code>
-            </div>
           </div>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Demo credentials
+          </p>
+          <code className="mt-1 block font-mono text-sm text-foreground">
+            User&nbsp;/&nbsp;User
+          </code>
         </div>
 
         <form onSubmit={form.handleSubmit((v) => doLogin.mutate(v))} className="space-y-4">
