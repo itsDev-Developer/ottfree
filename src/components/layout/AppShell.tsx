@@ -100,25 +100,32 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Shield className="h-4 w-4" /> Admin
             </Link>
           )}
+          <Link
+            to="/search"
+            aria-label="Search"
+            className="rounded-full border border-white/10 bg-white/5 p-2 text-muted-foreground transition hover:bg-white/10 hover:text-foreground md:hidden"
+          >
+            <Search className="h-4 w-4" />
+          </Link>
           <button
             onClick={() => doLogout.mutate()}
-            className="rounded-full border border-white/10 bg-white/5 p-2 text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+            disabled={doLogout.isPending}
+            className="rounded-full border border-white/10 bg-white/5 p-2 text-muted-foreground transition hover:bg-white/10 hover:text-foreground disabled:opacity-50"
             aria-label="Sign out"
           >
             <LogOut className="h-4 w-4" />
           </button>
-          <button className="rounded-full border border-white/10 bg-white/5 p-2 md:hidden" aria-label="Menu">
-            <Menu className="h-4 w-4" />
-          </button>
         </div>
       </header>
 
-      <main className="flex-1 pb-24 md:pb-8">{children}</main>
+      <main id="main" className="flex-1 pb-28 md:pb-8">
+        {children}
+      </main>
 
       <SiteFooter />
 
-      <nav className="glass fixed bottom-3 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full px-2 py-1.5 md:hidden">
-        {navItems.map((n) => {
+      <nav className="glass fixed bottom-3 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full px-2 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] md:hidden">
+        {mobileNav.map((n) => {
           const active = path === n.to || (n.to !== "/home" && path.startsWith(n.to));
           return (
             <Link
@@ -134,6 +141,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           );
         })}
       </nav>
+
     </div>
   );
 }
