@@ -117,6 +117,8 @@
   html {
     background-color: var(--color-background);
     color-scheme: dark;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
   body {
     background-color: var(--color-background);
@@ -125,10 +127,60 @@
     background-image:
       radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--primary) 25%, transparent), transparent 60%),
       radial-gradient(900px 500px at 110% 10%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%);
-    background-attachment: fixed;
+    background-repeat: no-repeat;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* `fixed` attachment repaints the whole viewport on every scroll frame —
+     only pay for it on pointer devices that can afford it. */
+  @media (min-width: 768px) {
+    body {
+      background-attachment: fixed;
+    }
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  img,
+  video {
+    content-visibility: auto;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 45%, transparent);
+  }
+  /* Slim, on-theme scrollbars instead of the default chrome. */
+  * {
+    scrollbar-color: color-mix(in oklab, var(--primary) 45%, transparent) transparent;
+    scrollbar-width: thin;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--primary) 40%, transparent);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
