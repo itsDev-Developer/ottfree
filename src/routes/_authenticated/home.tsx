@@ -7,6 +7,7 @@ import { Row } from "@/components/media/Row";
 import { BannerAd } from "@/components/media/BannerAd";
 import { Link } from "@tanstack/react-router";
 import { Thumbnail } from "@/components/media/Thumbnail";
+import { HomeSkeleton } from "@/components/media/Skeletons";
 import { getContinueWatching } from "@/store/continueWatching";
 import { useEffect, useRef, useState } from "react";
 import type { WatchProgress } from "@/store/continueWatching";
@@ -21,6 +22,7 @@ const PAGE_SIZE = 20;
 
 export const Route = createFileRoute("/_authenticated/home")({
   loader: ({ context }) => context.queryClient.ensureQueryData(homeOptions),
+  pendingComponent: HomeSkeleton,
   component: HomePage,
 });
 
