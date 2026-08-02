@@ -34,7 +34,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
       {site.data?.header_html && (
         <div
           className="border-b border-white/10 bg-primary/10 px-4 py-2 text-center text-xs md:px-8"
@@ -42,6 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
       )}
       <header className="glass sticky top-0 z-40 flex h-16 items-center gap-4 px-4 md:px-8">
+
         <Link to="/home" className="flex items-center gap-2">
           {logoUrl ? (
             <img src={logoUrl} alt={siteName} className="h-8 w-8 rounded-lg object-cover" />
