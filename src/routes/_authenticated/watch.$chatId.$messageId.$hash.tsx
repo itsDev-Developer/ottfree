@@ -11,18 +11,66 @@ import { fetchAdsBySlot } from "@/lib/cloudSettings";
 import { toast } from "sonner";
 import { Share2, Download, Link as LinkIcon, ChevronLeft } from "lucide-react";
 
+const watchOptions = (chatId: string, messageId: string, hash: string) =>
+  queryOptions({
+    queryKey: ["watch", chatId, messageId, hash],
+    queryFn: () => fetchWatch(chatId, messageId, hash),
+    staleTime: 5 * 60 * 1000,
+  });
+
 export const Route = createFileRoute("/_authenticated/watch/$chatId/$messageId/$hash")({
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(
+      watchOptions(params.chatId, params.messageId, params.hash),
+    ),
+  head: ({ params, loaderData }) => {
+    const url = `https://ottfree.lovable.app/watch/${params.chatId}/${params.messageId}/${params.hash}`;
+    const name = loaderData?.title ?? "Stream";
+    const source = loaderData?.channelName ?? `OTT ${params.chatId}`;
+    const title = `${name} — Watch on SurfTG`;
+    const description = `Stream ${name}${loaderData?.resolution ? ` in ${loaderData.resolution}` : ""} from ${source}${loaderData?.size ? ` (${loaderData.size})` : ""} — instant playback in your browser.`;
+    const image = loaderData?.thumbnail?.startsWith("http") ? loaderData.thumbnail : undefined;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description.slice(0, 158) },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description.slice(0, 158) },
+        { property: "og:type", content: "video.other" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            name,
+            description: description.slice(0, 158),
+            thumbnailUrl: image,
+            uploadDate: undefined,
+            contentUrl: url,
+          }),
+        },
+      ],
+    };
+  },
   component: WatchPage,
 });
 
 function WatchPage() {
   const { chatId, messageId, hash } = Route.useParams();
 
-  const query = useQuery({
-    queryKey: ["watch", chatId, messageId, hash],
-    queryFn: () => fetchWatch(chatId, messageId, hash),
-    staleTime: 5 * 60 * 1000,
-  });
+  const query = useQuery(watchOptions(chatId, messageId, hash));
+
 
   const preroll = useQuery({
     queryKey: ["ads", "preroll"],
