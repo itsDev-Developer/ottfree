@@ -22,9 +22,37 @@ const PAGE_SIZE = 20;
 
 export const Route = createFileRoute("/_authenticated/home")({
   loader: ({ context }) => context.queryClient.ensureQueryData(homeOptions),
+  head: ({ loaderData }) => {
+    const channels = loaderData?.channels ?? [];
+    const names = channels.slice(0, 4).map((c) => c.name).filter(Boolean);
+    const title = "Watch Free Movies, Series & Live OTT Streams — SurfTG";
+    const description = names.length
+      ? `Stream ${channels.length}+ OTT sources including ${names.join(", ")}. Instant playback of movies, series and more — no downloads required.`
+      : "Stream movies, series and live OTT channels instantly in your browser with SurfTG.";
+    const image = loaderData?.featured?.find((f) => f.thumbnail?.startsWith("http"))?.thumbnail;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: "https://ottfree.lovable.app/home" },
+        { name: "twitter:card", content: "summary_large_image" },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: "https://ottfree.lovable.app/home" }],
+    };
+  },
   pendingComponent: HomeSkeleton,
   component: HomePage,
 });
+
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeOptions);
