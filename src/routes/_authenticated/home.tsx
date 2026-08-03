@@ -85,6 +85,32 @@ function HomePage() {
   const recentVisible = data.recent.slice(0, visible);
   const hasMore = visible < data.recent.length;
 
+  const sections = useMemo(() => {
+    const all = data.recent;
+    const isSeries = (m: MediaItem) =>
+      /(^|[^a-z])s\d{1,2}\s?[.\-_ ]?e\d{1,3}([^a-z]|$)|season\s?\d|episode\s?\d|\bep\.?\s?\d{1,3}\b/i.test(
+        m.title,
+      );
+    const isAnime = (m: MediaItem) => /anime|\[(sub|dub)\]|\bsubbed\b|\bdubbed\b/i.test(m.title);
+    const is4k = (m: MediaItem) => /\b(4k|2160p|uhd)\b/i.test(m.title);
+    const isHd = (m: MediaItem) => /\b(1080p|1440p|bluray|web-?dl)\b/i.test(m.title);
+
+    const series = all.filter(isSeries);
+    const anime = all.filter((m) => isAnime(m) && !isSeries(m));
+    const movies = all.filter((m) => !isSeries(m) && !isAnime(m));
+    const uhd = all.filter(is4k);
+    const hd = all.filter((m) => !is4k(m) && isHd(m));
+    const trending = [...all].slice(0, 40).filter((m) => !!m.thumbnail).slice(0, 10);
+
+    const bySource = data.channels
+      .slice(0, 6)
+      .map((c) => ({ channel: c, items: all.filter((m) => m.channelName === c.name) }))
+      .filter((s) => s.items.length >= 4);
+
+    return { trending, movies, series, anime, uhd, hd, bySource };
+  }, [data.recent, data.channels]);
+
+
   return (
     <div>
       {featuredItems.length > 0 ? (
