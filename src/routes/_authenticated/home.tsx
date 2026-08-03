@@ -3,14 +3,17 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { fetchHome } from "@/services/backend";
 import { FeaturedCarousel } from "@/components/media/FeaturedCarousel";
 import { MediaCard } from "@/components/media/MediaCard";
+import { MediaRow } from "@/components/media/MediaRow";
 import { Row } from "@/components/media/Row";
 import { BannerAd } from "@/components/media/BannerAd";
 import { Link } from "@tanstack/react-router";
 import { Thumbnail } from "@/components/media/Thumbnail";
 import { GridSkeleton, HomeSkeleton } from "@/components/media/Skeletons";
 import { getContinueWatching } from "@/store/continueWatching";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { WatchProgress } from "@/store/continueWatching";
+import type { MediaItem } from "@/types/dto";
+
 
 const homeOptions = queryOptions({
   queryKey: ["home"],
