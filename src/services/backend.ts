@@ -212,6 +212,18 @@ function buildStreamUrl(chatId: string, messageId: string, hash: string, filenam
   return `/api/proxy/${chatId}/${encoded}?id=${encodeURIComponent(messageId)}&hash=${encodeURIComponent(hash)}`;
 }
 
+function guessResolution(title: string): string | undefined {
+  const m = title.match(/(\d{3,4})[pi]\b/i) ?? title.match(/\b(4k|uhd|2160p|1440p|1080p|720p|480p|360p)\b/i);
+  if (!m) return undefined;
+  const v = m[0].toLowerCase();
+  if (v === "4k" || v === "uhd") return "2160p (4K)";
+  return v;
+}
+
+function ensureExtension(title: string): string {
+  return /\.[a-z0-9]{2,5}$/i.test(title) ? title : `${title}.mp4`;
+}
+
 export async function fetchWatch(chatId: string, messageId: string, hash: string): Promise<WatchData> {
   // The backend's HTML /watch page 500s, so we rebuild the payload from the
   // channel listing and stream directly from /{chat_id}/{encoded_name}.
@@ -220,32 +232,46 @@ export async function fetchWatch(chatId: string, messageId: string, hash: string
   let size: string | undefined;
   let channelName: string | undefined;
   let related: MediaItem[] = [];
-  try {
-    const ch = await fetchChannel(chatId, 1);
-    const hit = ch.items.find((m) => String(m.id) === String(messageId));
-    if (hit) {
-      title = hit.title;
-      thumbnail = hit.thumbnail;
-      size = hit.size;
-      channelName = hit.channelName;
+  let found = false;
+
+  // Scan the first few pages so titles/metadata resolve even for older items.
+  for (let page = 1; page <= 3 && !found; page++) {
+    try {
+      const ch = await fetchChannel(chatId, page);
+      if (ch.items.length === 0) break;
+      const hit = ch.items.find((m) => String(m.id) === String(messageId));
+      if (hit) {
+        found = true;
+        title = hit.title;
+        thumbnail = hit.thumbnail;
+        size = hit.size;
+        channelName = hit.channelName;
+      }
+      if (related.length === 0 || found) {
+        related = ch.items.filter((m) => String(m.id) !== String(messageId)).slice(0, 12);
+      }
+      if (!ch.hasMore) break;
+    } catch {
+      break;
     }
-    related = ch.items.filter((m) => String(m.id) !== String(messageId)).slice(0, 12);
-  } catch {
-    /* ignore */
   }
+
+  const filename = ensureExtension(title);
   return {
     chatId,
     messageId,
     hash,
     title,
-    filename: title,
-    streamUrl: buildStreamUrl(chatId, messageId, hash, title),
+    filename,
+    streamUrl: buildStreamUrl(chatId, messageId, hash, filename),
     thumbnail,
     size,
+    resolution: guessResolution(title),
     channelName,
     related,
   };
 }
+
 
 export function thumbUrl(chatId: string, messageId?: string): string {
   const q = messageId ? `?id=${messageId}` : "";

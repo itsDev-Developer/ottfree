@@ -3,6 +3,7 @@ import videojs from "video.js";
 import type Player from "video.js/dist/types/player";
 import "video.js/dist/video-js.css";
 import { loadVast, fireBeacons, type VastAd } from "@/lib/vast";
+import { buildSources, containerLabel, guessType } from "@/lib/media-source";
 
 interface Props {
   src: string;
@@ -15,6 +16,7 @@ interface Props {
 export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl }: Props) {
   const videoRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<Player | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [adState, setAdState] = useState<{
     playing: boolean;
     canSkip: boolean;
@@ -29,34 +31,49 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
     videoEl.classList.add("vjs-big-play-centered", "vjs-fluid");
     videoRef.current.appendChild(videoEl);
 
+    const contentSources = buildSources(src);
+
     const player = videojs(videoEl, {
       autoplay: false,
       controls: true,
       responsive: true,
       fluid: true,
       preload: "metadata",
-      playbackRates: [0.5, 1, 1.25, 1.5, 2],
+      playbackRates: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3],
       poster,
-      sources: [{ src, type: "video/mp4" }],
+      // Cross-container/codec playback: let VHS handle HLS/DASH and allow
+      // native engines to take over anything they can decode themselves.
+      html5: {
+        vhs: { overrideNative: !videojs.browser.IS_SAFARI, withCredentials: true },
+        nativeAudioTracks: videojs.browser.IS_SAFARI,
+        nativeVideoTracks: videojs.browser.IS_SAFARI,
+        nativeTextTracks: false,
+      },
+      controlBar: { pictureInPictureToggle: true },
+      sources: contentSources,
     });
 
     playerRef.current = player;
 
     const savedVol = Number(localStorage.getItem("surftg:volume") ?? "1");
     if (!Number.isNaN(savedVol)) player.volume(savedVol);
+    const savedRate = Number(localStorage.getItem("surftg:rate") ?? "1");
+    if (savedRate > 0) player.playbackRate(savedRate);
 
     let adPlayed = false;
     let ad: VastAd | null = null;
     let quartileFired = new Set<string>();
 
+    const seekToStart = () => {
+      if (startTime > 0 && startTime < (player.duration() ?? 0) - 5) {
+        player.currentTime(startTime);
+      }
+    };
+
     const startContent = () => {
       setAdState({ playing: false, canSkip: false, remaining: 0 });
-      player.src({ src, type: "video/mp4" });
-      player.one("loadedmetadata", () => {
-        if (startTime > 0 && startTime < (player.duration() ?? 0) - 5) {
-          player.currentTime(startTime);
-        }
-      });
+      player.src(contentSources);
+      player.one("loadedmetadata", seekToStart);
     };
 
     const playAd = async () => {
@@ -69,7 +86,7 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
       }
       if (!ad) return;
 
-      player.src({ src: ad.mediaUrl, type: "video/mp4" });
+      player.src({ src: ad.mediaUrl, type: guessType(ad.mediaUrl) });
       fireBeacons(ad.impressions);
       fireBeacons(ad.trackingEvents.creativeView);
       quartileFired = new Set();
@@ -121,16 +138,66 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
       };
       player.one("play", onFirstPlay);
     } else {
-      player.on("loadedmetadata", () => {
-        if (startTime > 0 && startTime < (player.duration() ?? 0) - 5) {
-          player.currentTime(startTime);
-        }
-      });
+      player.on("loadedmetadata", seekToStart);
     }
 
     player.on("volumechange", () => {
       localStorage.setItem("surftg:volume", String(player.volume() ?? 1));
     });
+    player.on("ratechange", () => {
+      localStorage.setItem("surftg:rate", String(player.playbackRate() ?? 1));
+    });
+
+    player.on("error", () => {
+      if (adPlayed && adState.playing) return;
+      setError(
+        `This ${containerLabel(src)} file uses a codec your browser can't decode. Try downloading it and playing in VLC.`,
+      );
+    });
+    player.on("loadeddata", () => setError(null));
+
+    // VLC-style keyboard shortcuts
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && /input|textarea|select/i.test(target.tagName)) return;
+      const p = playerRef.current;
+      if (!p) return;
+      const cur = p.currentTime() ?? 0;
+      switch (e.key.toLowerCase()) {
+        case " ":
+        case "k":
+          e.preventDefault();
+          p.paused() ? p.play()?.catch(() => {}) : p.pause();
+          break;
+        case "arrowright":
+          p.currentTime(cur + (e.shiftKey ? 60 : 10));
+          break;
+        case "arrowleft":
+          p.currentTime(Math.max(0, cur - (e.shiftKey ? 60 : 10)));
+          break;
+        case "arrowup":
+          p.volume(Math.min(1, (p.volume() ?? 1) + 0.05));
+          break;
+        case "arrowdown":
+          p.volume(Math.max(0, (p.volume() ?? 1) - 0.05));
+          break;
+        case "m":
+          p.muted(!p.muted());
+          break;
+        case "f":
+          p.isFullscreen() ? p.exitFullscreen() : p.requestFullscreen();
+          break;
+        case "]":
+          p.playbackRate(Math.min(3, (p.playbackRate() ?? 1) + 0.25));
+          break;
+        case "[":
+          p.playbackRate(Math.max(0.25, (p.playbackRate() ?? 1) - 0.25));
+          break;
+        default:
+          break;
+      }
+    };
+    window.addEventListener("keydown", onKey);
 
     let last = 0;
     player.on("timeupdate", () => {
@@ -140,14 +207,12 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
         last = now;
         const t = player.currentTime() ?? 0;
         const d = player.duration() ?? 0;
-        // Guard against reporting ad progress
-        if (!adPlayed || (ad && Math.abs((player.duration() ?? 0) - (ad?.mediaUrl ? 0 : 0)) >= 0)) {
-          onProgress?.(t, d);
-        }
+        if (d > 0) onProgress?.(t, d);
       }
     });
 
     return () => {
+      window.removeEventListener("keydown", onKey);
       player.dispose();
       playerRef.current = null;
     };
@@ -166,6 +231,18 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
       <div data-vjs-player className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
         <div ref={videoRef} />
       </div>
+      {error && !adState.playing && (
+        <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+          <span>{error}</span>
+          <a
+            href={src}
+            download
+            className="rounded-md bg-yellow-500 px-3 py-1 text-xs font-semibold text-black"
+          >
+            Download file
+          </a>
+        </div>
+      )}
       {adState.playing && (
         <div className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-2">
           <span className="pointer-events-auto rounded-md bg-yellow-500/90 px-2 py-1 text-xs font-bold text-black">

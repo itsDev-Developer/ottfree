@@ -7,9 +7,26 @@ import { MediaCard } from "@/components/media/MediaCard";
 import { getRecentSearches, pushRecentSearch } from "@/store/continueWatching";
 import type { MediaItem } from "@/types/dto";
 
+const SEARCH_TITLE = "Search Movies, Series & OTT Titles — SurfTG";
+const SEARCH_DESC =
+  "Search across every connected OTT source at once and start streaming movies, series, anime and documentaries in seconds.";
+
 export const Route = createFileRoute("/_authenticated/search")({
+  head: () => ({
+    meta: [
+      { title: SEARCH_TITLE },
+      { name: "description", content: SEARCH_DESC },
+      { property: "og:title", content: SEARCH_TITLE },
+      { property: "og:description", content: SEARCH_DESC },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://ottfree.lovable.app/search" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://ottfree.lovable.app/search" }],
+  }),
   component: SearchPage,
 });
+
 
 function useDebounced<T>(value: T, delay = 300): T {
   const [v, setV] = useState(value);
