@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, queryOptions } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { fetchWatch } from "@/services/backend";
 import { VideoPlayer } from "@/components/player/VideoPlayer";
