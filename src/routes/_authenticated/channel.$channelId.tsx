@@ -3,7 +3,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchChannel, searchChannel } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type ChannelSearch = { page?: number; q?: string };
 
@@ -50,12 +50,7 @@ function ChannelPage() {
     refetchOnMount: "always",
   });
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [page, q]);
-
   const items = query.data?.items ?? [];
-  const showSkeleton = query.isLoading || query.isFetching;
 
   return (
     <div className="px-4 py-6 md:px-8">
@@ -90,7 +85,7 @@ function ChannelPage() {
       </div>
 
 
-      {showSkeleton ? (
+      {query.isLoading ? (
         <SkeletonGrid />
       ) : items.length === 0 ? (
         <div className="glass mt-10 rounded-3xl p-12 text-center">
