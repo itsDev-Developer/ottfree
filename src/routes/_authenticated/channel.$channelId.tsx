@@ -86,7 +86,7 @@ function ChannelPage() {
       </div>
 
 
-      {query.isLoading ? (
+      {showSkeleton ? (
         <SkeletonGrid />
       ) : items.length === 0 ? (
         <div className="glass mt-10 rounded-3xl p-12 text-center">
