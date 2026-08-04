@@ -5,11 +5,31 @@ import { MediaCard } from "@/components/media/MediaCard";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
+type ChannelSearch = { page: number; q?: string };
+
 export const Route = createFileRoute("/_authenticated/channel/$channelId")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    page: Number(s.page) || 1,
-    q: typeof s.q === "string" ? s.q : "",
-  }),
+  validateSearch: (s: Record<string, unknown>): ChannelSearch => {
+    const page = Number(s.page) || 1;
+    const q = typeof s.q === "string" && s.q.trim() ? s.q : undefined;
+    return q ? { page, q } : { page };
+  },
+  head: ({ params }) => {
+    const title = `OTT ${params.channelId} — Browse & Stream | OttFree`;
+    const description = `Browse every title in OTT source ${params.channelId} and start streaming instantly on OttFree.`;
+    const url = `https://ottfree.lovable.app/channel/${params.channelId}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: ChannelPage,
 });
 
@@ -17,7 +37,7 @@ function ChannelPage() {
   const { channelId } = Route.useParams();
   const { page, q } = useSearch({ from: "/_authenticated/channel/$channelId" });
   const nav = useNavigate({ from: "/_authenticated/channel/$channelId" });
-  const [term, setTerm] = useState(q);
+  const [term, setTerm] = useState(q ?? "");
 
   const query = useQuery({
     queryKey: q ? ["channel-search", channelId, q, page] : [`channel-${channelId}-page-${page}`],
