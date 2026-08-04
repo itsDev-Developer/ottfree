@@ -3,7 +3,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchChannel, searchChannel } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ChannelSearch = { page?: number; q?: string };
 
@@ -49,6 +49,10 @@ function ChannelPage() {
     placeholderData: keepPreviousData,
     refetchOnMount: "always",
   });
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page, q]);
 
   const items = query.data?.items ?? [];
   const showSkeleton = query.isLoading || query.isFetching;
