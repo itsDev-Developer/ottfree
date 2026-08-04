@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,6 +21,11 @@ import { Route as AuthenticatedFolderFolderIdRouteImport } from './routes/_authe
 import { Route as AuthenticatedChannelChannelIdRouteImport } from './routes/_authenticated/channel.$channelId'
 import { Route as AuthenticatedWatchChatIdMessageIdHashRouteImport } from './routes/_authenticated/watch.$chatId.$messageId.$hash'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -76,6 +82,7 @@ const AuthenticatedWatchChatIdMessageIdHashRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/search': typeof AuthenticatedSearchRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/search': typeof AuthenticatedSearchRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/sitemap.xml'
     | '/admin'
     | '/home'
     | '/search'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/sitemap.xml'
     | '/admin'
     | '/home'
     | '/search'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/home'
     | '/_authenticated/search'
@@ -149,11 +161,19 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiProxySplatRoute: typeof ApiProxySplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -254,6 +274,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiProxySplatRoute: ApiProxySplatRoute,
 }
 export const routeTree = rootRouteImport

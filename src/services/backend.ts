@@ -176,16 +176,27 @@ export async function fetchHome(): Promise<HomeData> {
   return { featured, channels, folders, recent, isAdmin: !!data.is_admin };
 }
 
+const PAGE_SIZE = 20;
+
+function resolveHasMore(
+  data: { has_next?: boolean; next_page?: number | null },
+  count: number,
+): boolean {
+  if (typeof data.has_next === "boolean") return data.has_next;
+  if (data.next_page != null) return true;
+  return count >= PAGE_SIZE;
+}
+
 export async function fetchChannel(channelId: string, page = 1): Promise<Page<MediaItem>> {
   const data = await getJson<ChannelResp>(`/channel/${channelId}?page=${page}`);
   const items = (data.files ?? []).map(fileToItem).map((m) => ({ ...m, channelName: data.title }));
-  return { items, page, hasMore: !!data.has_next };
+  return { items, page, hasMore: resolveHasMore(data, items.length) };
 }
 
 export async function searchChannel(channelId: string, q: string, page = 1): Promise<Page<MediaItem>> {
   const data = await getJson<ChannelResp>(`/search/${channelId}?q=${encodeURIComponent(q)}&page=${page}`);
   const items = (data.files ?? []).map(fileToItem).map((m) => ({ ...m, channelName: data.title }));
-  return { items, page, hasMore: !!data.has_next };
+  return { items, page, hasMore: resolveHasMore(data, items.length) };
 }
 
 export async function fetchFolder(folderId: string, page = 1): Promise<Page<MediaItem | Folder>> {

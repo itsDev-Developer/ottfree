@@ -1,23 +1,46 @@
-import { createFileRoute, useSearch, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchChannel, searchChannel } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
+type ChannelSearch = { page?: number; q?: string };
+
+
 export const Route = createFileRoute("/_authenticated/channel/$channelId")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    page: Number(s.page) || 1,
-    q: typeof s.q === "string" ? s.q : "",
-  }),
+  validateSearch: (s: Record<string, unknown>): ChannelSearch => {
+    const page = Number(s.page) || 1;
+    const q = typeof s.q === "string" && s.q.trim() ? s.q : undefined;
+    return q ? { page, q } : { page };
+  },
+  head: ({ params }) => {
+    const title = `OTT ${params.channelId} — Browse & Stream | OttFree`;
+    const description = `Browse every title in OTT source ${params.channelId} and start streaming instantly on OttFree.`;
+    const url = `https://ottfree.lovable.app/channel/${params.channelId}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: ChannelPage,
 });
 
 function ChannelPage() {
   const { channelId } = Route.useParams();
-  const { page, q } = useSearch({ from: "/_authenticated/channel/$channelId" });
-  const nav = useNavigate({ from: "/_authenticated/channel/$channelId" });
-  const [term, setTerm] = useState(q);
+  const search = Route.useSearch();
+  const page = search.page ?? 1;
+  const q = search.q;
+  const nav = Route.useNavigate();
+  const [term, setTerm] = useState(q ?? "");
 
   const query = useQuery({
     queryKey: q ? ["channel-search", channelId, q, page] : [`channel-${channelId}-page-${page}`],
@@ -47,7 +70,7 @@ function ChannelPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            nav({ search: { q: term, page: 1 } });
+            nav({ search: term.trim() ? { q: term.trim(), page: 1 } : { page: 1 } });
           }}
           className="ml-auto flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2"
         >
@@ -79,7 +102,7 @@ function ChannelPage() {
       <div className="mt-10 flex items-center justify-center gap-3">
         <button
           disabled={page <= 1}
-          onClick={() => nav({ search: ((p: { page: number; q: string }) => ({ ...p, page: page - 1 })) })}
+          onClick={() => nav({ search: (p: ChannelSearch) => ({ ...p, page: page - 1 }) })}
           className="rounded-full border border-white/10 bg-white/5 p-2 disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -87,7 +110,7 @@ function ChannelPage() {
         <span className="text-sm text-muted-foreground">Page {page}</span>
         <button
           disabled={!query.data?.hasMore}
-          onClick={() => nav({ search: ((p: { page: number; q: string }) => ({ ...p, page: page + 1 })) })}
+          onClick={() => nav({ search: (p: ChannelSearch) => ({ ...p, page: page + 1 }) })}
           className="rounded-full border border-white/10 bg-white/5 p-2 disabled:opacity-40"
         >
           <ChevronRight className="h-4 w-4" />

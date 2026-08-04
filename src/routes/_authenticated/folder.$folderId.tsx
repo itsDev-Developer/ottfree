@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchFolder, searchFolder } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
@@ -6,11 +6,14 @@ import { Thumbnail } from "@/components/media/Thumbnail";
 import { ChevronLeft, ChevronRight, Folder as FolderIcon } from "lucide-react";
 import type { Folder as FolderT } from "@/types/dto";
 
+type FolderSearch = { page?: number; q?: string };
+
 export const Route = createFileRoute("/_authenticated/folder/$folderId")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    page: Number(s.page) || 1,
-    q: typeof s.q === "string" ? s.q : "",
-  }),
+  validateSearch: (s: Record<string, unknown>): FolderSearch => {
+    const page = Number(s.page) || 1;
+    const q = typeof s.q === "string" && s.q.trim() ? s.q : undefined;
+    return q ? { page, q } : { page };
+  },
   component: FolderPage,
 });
 
@@ -20,8 +23,10 @@ function isFolder(x: unknown): x is FolderT {
 
 function FolderPage() {
   const { folderId } = Route.useParams();
-  const { page, q } = useSearch({ from: "/_authenticated/folder/$folderId" });
-  const nav = useNavigate({ from: "/_authenticated/folder/$folderId" });
+  const search = Route.useSearch();
+  const page = search.page ?? 1;
+  const q = search.q;
+  const nav = Route.useNavigate();
 
   const query = useQuery({
     queryKey: q ? ["folder-search", folderId, q, page] : [`folder-${folderId}-page-${page}`],
@@ -77,7 +82,7 @@ function FolderPage() {
       <div className="mt-10 flex items-center justify-center gap-3">
         <button
           disabled={page <= 1}
-          onClick={() => nav({ search: ((p: { page: number; q: string }) => ({ ...p, page: page - 1 })) })}
+          onClick={() => nav({ search: (p: FolderSearch) => ({ ...p, page: page - 1 }) })}
           className="rounded-full border border-white/10 bg-white/5 p-2 disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -85,7 +90,7 @@ function FolderPage() {
         <span className="text-sm text-muted-foreground">Page {page}</span>
         <button
           disabled={!query.data?.hasMore}
-          onClick={() => nav({ search: ((p: { page: number; q: string }) => ({ ...p, page: page + 1 })) })}
+          onClick={() => nav({ search: (p: FolderSearch) => ({ ...p, page: page + 1 }) })}
           className="rounded-full border border-white/10 bg-white/5 p-2 disabled:opacity-40"
         >
           <ChevronRight className="h-4 w-4" />
