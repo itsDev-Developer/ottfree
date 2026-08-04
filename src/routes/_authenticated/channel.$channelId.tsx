@@ -67,7 +67,7 @@ function ChannelPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            nav({ search: { q: term, page: 1 } });
+            nav({ search: term.trim() ? { q: term.trim(), page: 1 } : { page: 1 } });
           }}
           className="ml-auto flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2"
         >
@@ -99,7 +99,7 @@ function ChannelPage() {
       <div className="mt-10 flex items-center justify-center gap-3">
         <button
           disabled={page <= 1}
-          onClick={() => nav({ search: ((p: { page: number; q: string }) => ({ ...p, page: page - 1 })) })}
+          onClick={() => nav({ search: (p: ChannelSearch) => ({ ...p, page: page - 1 }) })}
           className="rounded-full border border-white/10 bg-white/5 p-2 disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -107,7 +107,7 @@ function ChannelPage() {
         <span className="text-sm text-muted-foreground">Page {page}</span>
         <button
           disabled={!query.data?.hasMore}
-          onClick={() => nav({ search: ((p: { page: number; q: string }) => ({ ...p, page: page + 1 })) })}
+          onClick={() => nav({ search: (p: ChannelSearch) => ({ ...p, page: page + 1 }) })}
           className="rounded-full border border-white/10 bg-white/5 p-2 disabled:opacity-40"
         >
           <ChevronRight className="h-4 w-4" />
