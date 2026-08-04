@@ -36,8 +36,10 @@ export const Route = createFileRoute("/_authenticated/channel/$channelId")({
 
 function ChannelPage() {
   const { channelId } = Route.useParams();
-  const { page, q } = useSearch({ from: "/_authenticated/channel/$channelId" });
-  const nav = useNavigate({ from: "/_authenticated/channel/$channelId" });
+  const search = Route.useSearch();
+  const page = search.page ?? 1;
+  const q = search.q;
+  const nav = Route.useNavigate();
   const [term, setTerm] = useState(q ?? "");
 
   const query = useQuery({
