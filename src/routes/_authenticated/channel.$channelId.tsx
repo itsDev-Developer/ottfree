@@ -1,11 +1,12 @@
-import { createFileRoute, useSearch, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchChannel, searchChannel } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
-type ChannelSearch = { page: number; q?: string };
+type ChannelSearch = { page?: number; q?: string };
+
 
 export const Route = createFileRoute("/_authenticated/channel/$channelId")({
   validateSearch: (s: Record<string, unknown>): ChannelSearch => {
