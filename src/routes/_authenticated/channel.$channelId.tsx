@@ -51,6 +51,7 @@ function ChannelPage() {
   });
 
   const items = query.data?.items ?? [];
+  const showSkeleton = query.isLoading || query.isFetching;
 
   return (
     <div className="px-4 py-6 md:px-8">
