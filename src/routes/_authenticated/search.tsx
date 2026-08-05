@@ -4,6 +4,7 @@ import { Search as SearchIcon, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchHome, searchChannel } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
+import { GridSkeleton } from "@/components/media/Skeletons";
 import { getRecentSearches, pushRecentSearch } from "@/store/continueWatching";
 import type { MediaItem } from "@/types/dto";
 
