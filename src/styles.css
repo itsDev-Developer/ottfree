@@ -184,3 +184,27 @@
   }
 }
 
+
+/* --- TV remote / D-pad focus affordances for the Video.js control bar --- */
+.video-js.vjs-tv-focus .vjs-control-bar {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.video-js .vjs-control-bar :is(button, [role="button"], .vjs-progress-control):focus,
+.video-js .vjs-control-bar :is(button, [role="button"], .vjs-progress-control):focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: -3px;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--primary) 28%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 55%, transparent);
+  z-index: 2;
+}
+
+.video-js .vjs-menu-item:focus,
+.video-js .vjs-menu-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  background: color-mix(in oklab, var(--primary) 30%, transparent);
+}
