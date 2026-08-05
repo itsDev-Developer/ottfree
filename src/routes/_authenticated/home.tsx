@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/home")({
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: "https://ottfree.lovable.app/home" },
+        { property: "og:url", content: "https://ottfree.in/home" },
         { name: "twitter:card", content: "summary_large_image" },
         ...(image
           ? [
@@ -49,7 +49,7 @@ export const Route = createFileRoute("/_authenticated/home")({
             ]
           : []),
       ],
-      links: [{ rel: "canonical", href: "https://ottfree.lovable.app/home" }],
+      links: [{ rel: "canonical", href: "https://ottfree.in/home" }],
     };
   },
   pendingComponent: HomeSkeleton,

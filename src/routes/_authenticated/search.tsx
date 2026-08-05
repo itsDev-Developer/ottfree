@@ -4,6 +4,7 @@ import { Search as SearchIcon, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchHome, searchChannel } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
+import { GridSkeleton } from "@/components/media/Skeletons";
 import { getRecentSearches, pushRecentSearch } from "@/store/continueWatching";
 import type { MediaItem } from "@/types/dto";
 
@@ -19,10 +20,10 @@ export const Route = createFileRoute("/_authenticated/search")({
       { property: "og:title", content: SEARCH_TITLE },
       { property: "og:description", content: SEARCH_DESC },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://ottfree.lovable.app/search" },
+      { property: "og:url", content: "https://ottfree.in/search" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://ottfree.lovable.app/search" }],
+    links: [{ rel: "canonical", href: "https://ottfree.in/search" }],
   }),
   component: SearchPage,
 });
@@ -130,13 +131,17 @@ function SearchPage() {
       {q && (
         <div className="mt-10">
           <p className="mb-4 text-sm text-muted-foreground">
-            {results.isLoading ? "Searching…" : `${results.data?.length ?? 0} results for "${q}"`}
+            {results.isPending ? "Searching…" : `${results.data?.length ?? 0} results for "${q}"`}
           </p>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {(results.data ?? []).map((m, i) => (
-              <MediaCard key={`${m.id}-${i}`} item={m} />
-            ))}
-          </div>
+          {results.isPending ? (
+            <GridSkeleton count={10} />
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {(results.data ?? []).map((m, i) => (
+                <MediaCard key={`${m.id}-${i}`} item={m} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
