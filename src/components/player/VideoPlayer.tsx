@@ -217,13 +217,22 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
           }
           return;
         case "ArrowLeft":
-        case "ArrowRight":
+        case "ArrowRight": {
+          e.preventDefault();
+          e.stopPropagation();
           if (inBar) {
-            e.preventDefault();
-            e.stopPropagation();
             focusControl(idx + (e.key === "ArrowRight" ? 1 : -1));
+          } else {
+            const cur = p.currentTime() ?? 0;
+            p.currentTime(
+              e.key === "ArrowRight"
+                ? cur + (e.shiftKey ? 60 : 10)
+                : Math.max(0, cur - (e.shiftKey ? 60 : 10)),
+            );
+            showControls();
           }
           return;
+        }
         case "Enter":
           if (inBar) {
             e.stopPropagation();
