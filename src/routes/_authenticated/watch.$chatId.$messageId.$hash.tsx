@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/watch/$chatId/$messageId/$
       watchOptions(params.chatId, params.messageId, params.hash),
     ),
   head: ({ params, loaderData }) => {
-    const url = `https://ottfree.lovable.app/watch/${params.chatId}/${params.messageId}/${params.hash}`;
+    const url = `https://ottfree.in/watch/${params.chatId}/${params.messageId}/${params.hash}`;
     const name = loaderData?.title ?? "Stream";
     const source = loaderData?.channelName ?? `OTT ${params.chatId}`;
     const title = `${name} — Watch on SurfTG`;

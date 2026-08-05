@@ -19,10 +19,10 @@ export const Route = createFileRoute("/_authenticated/search")({
       { property: "og:title", content: SEARCH_TITLE },
       { property: "og:description", content: SEARCH_DESC },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://ottfree.lovable.app/search" },
+      { property: "og:url", content: "https://ottfree.in/search" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://ottfree.lovable.app/search" }],
+    links: [{ rel: "canonical", href: "https://ottfree.in/search" }],
   }),
   component: SearchPage,
 });

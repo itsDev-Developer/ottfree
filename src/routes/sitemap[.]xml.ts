@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = "https://ottfree.lovable.app";
+const BASE_URL = "https://ottfree.in";
 
 interface SitemapEntry {
   path: string;

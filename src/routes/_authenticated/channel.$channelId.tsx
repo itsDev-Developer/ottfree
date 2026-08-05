@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/channel/$channelId")({
   head: ({ params }) => {
     const title = `OTT ${params.channelId} — Browse & Stream | OttFree`;
     const description = `Browse every title in OTT source ${params.channelId} and start streaming instantly on OttFree.`;
-    const url = `https://ottfree.lovable.app/channel/${params.channelId}`;
+    const url = `https://ottfree.in/channel/${params.channelId}`;
     return {
       meta: [
         { title },
