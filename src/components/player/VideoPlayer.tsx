@@ -313,6 +313,8 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
 
     return () => {
       window.removeEventListener("keydown", onKey);
+      shell?.removeEventListener("keydown", onDpad);
+      shell?.removeEventListener("focusout", onShellFocusOut);
       player.dispose();
       playerRef.current = null;
     };
