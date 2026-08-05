@@ -330,7 +330,14 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
 
   return (
     <div className="relative">
-      <div data-vjs-player className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+      <div
+        ref={shellRef}
+        tabIndex={0}
+        role="region"
+        aria-label="Video player — use arrow keys to navigate controls"
+        data-vjs-player
+        className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
         <div ref={videoRef} />
       </div>
       {error && !adState.playing && (
