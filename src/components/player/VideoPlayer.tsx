@@ -15,6 +15,7 @@ interface Props {
 
 export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl }: Props) {
   const videoRef = useRef<HTMLDivElement | null>(null);
+  const shellRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<Player | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adState, setAdState] = useState<{
@@ -156,10 +157,118 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
     });
     player.on("loadeddata", () => setError(null));
 
+    // --- TV remote / D-pad navigation inside the player -------------------
+    const shell = shellRef.current;
+
+    const controlButtons = (): HTMLElement[] => {
+      const bar = shell?.querySelector<HTMLElement>(".vjs-control-bar");
+      if (!bar) return [];
+      const nodes = Array.from(
+        bar.querySelectorAll<HTMLElement>(
+          'button, [role="button"], [tabindex]:not([tabindex="-1"]), .vjs-progress-control',
+        ),
+      ) as HTMLElement[];
+      return nodes.filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+    };
+
+    const showControls = () => {
+      player.userActive(true);
+      // keep the bar up while the remote is being used
+      player.addClass("vjs-tv-focus");
+    };
+
+    const focusControl = (index: number) => {
+      const list = controlButtons();
+      if (!list.length) return;
+      const el = list[Math.max(0, Math.min(list.length - 1, index))];
+      showControls();
+      el.setAttribute("tabindex", "0");
+      el.focus();
+    };
+
+    const onDpad = (e: KeyboardEvent) => {
+      const p = playerRef.current;
+      if (!p || !shell) return;
+      const target = e.target as HTMLElement | null;
+      if (target && /input|textarea|select/i.test(target.tagName)) return;
+
+      const bar = shell.querySelector<HTMLElement>(".vjs-control-bar");
+      const inBar = !!(target && bar && bar.contains(target));
+      const list = controlButtons();
+      const idx = target ? list.indexOf(target) : -1;
+
+      switch (e.key) {
+        case "ArrowDown":
+          if (!inBar) {
+            e.preventDefault();
+            e.stopPropagation();
+            focusControl(0);
+          }
+          return;
+        case "ArrowUp":
+          if (inBar) {
+            e.preventDefault();
+            e.stopPropagation();
+            player.removeClass("vjs-tv-focus");
+            shell.focus();
+          }
+          return;
+        case "ArrowLeft":
+        case "ArrowRight": {
+          e.preventDefault();
+          e.stopPropagation();
+          if (inBar) {
+            focusControl(idx + (e.key === "ArrowRight" ? 1 : -1));
+          } else {
+            const cur = p.currentTime() ?? 0;
+            p.currentTime(
+              e.key === "ArrowRight"
+                ? cur + (e.shiftKey ? 60 : 10)
+                : Math.max(0, cur - (e.shiftKey ? 60 : 10)),
+            );
+            showControls();
+          }
+          return;
+        }
+        case "Enter":
+          if (inBar) {
+            e.stopPropagation();
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          p.paused() ? p.play()?.catch(() => {}) : p.pause();
+          return;
+        case "Escape":
+        case "Backspace":
+          if (inBar) {
+            e.preventDefault();
+            e.stopPropagation();
+            player.removeClass("vjs-tv-focus");
+            shell.focus();
+          }
+          return;
+        default:
+          return;
+      }
+    };
+    shell?.addEventListener("keydown", onDpad);
+
+    const onShellFocusOut = (e: FocusEvent) => {
+      const next = e.relatedTarget as Node | null;
+      if (!next || !shell?.contains(next)) player.removeClass("vjs-tv-focus");
+    };
+    shell?.addEventListener("focusout", onShellFocusOut);
+
     // VLC-style keyboard shortcuts
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && /input|textarea|select/i.test(target.tagName)) return;
+      // control-bar focus is handled by the D-pad handler above
+      if (target && shell?.querySelector(".vjs-control-bar")?.contains(target)) return;
       const p = playerRef.current;
       if (!p) return;
       const cur = p.currentTime() ?? 0;
@@ -213,6 +322,8 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
 
     return () => {
       window.removeEventListener("keydown", onKey);
+      shell?.removeEventListener("keydown", onDpad);
+      shell?.removeEventListener("focusout", onShellFocusOut);
       player.dispose();
       playerRef.current = null;
     };
@@ -228,7 +339,14 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
 
   return (
     <div className="relative">
-      <div data-vjs-player className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+      <div
+        ref={shellRef}
+        tabIndex={0}
+        role="region"
+        aria-label="Video player — use arrow keys to navigate controls"
+        data-vjs-player
+        className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
         <div ref={videoRef} />
       </div>
       {error && !adState.playing && (
