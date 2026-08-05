@@ -15,6 +15,7 @@ interface Props {
 
 export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl }: Props) {
   const videoRef = useRef<HTMLDivElement | null>(null);
+  const shellRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<Player | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adState, setAdState] = useState<{
