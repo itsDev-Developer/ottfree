@@ -160,14 +160,15 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
     // --- TV remote / D-pad navigation inside the player -------------------
     const shell = shellRef.current;
 
-    const controlButtons = () => {
+    const controlButtons = (): HTMLElement[] => {
       const bar = shell?.querySelector<HTMLElement>(".vjs-control-bar");
-      if (!bar) return [] as HTMLElement[];
-      return Array.from(
+      if (!bar) return [];
+      const nodes = Array.from(
         bar.querySelectorAll<HTMLElement>(
           'button, [role="button"], [tabindex]:not([tabindex="-1"]), .vjs-progress-control',
         ),
-      ).filter((el) => {
+      ) as HTMLElement[];
+      return nodes.filter((el) => {
         const r = el.getBoundingClientRect();
         return r.width > 0 && r.height > 0;
       });
