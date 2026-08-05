@@ -130,13 +130,17 @@ function SearchPage() {
       {q && (
         <div className="mt-10">
           <p className="mb-4 text-sm text-muted-foreground">
-            {results.isLoading ? "Searching…" : `${results.data?.length ?? 0} results for "${q}"`}
+            {results.isPending ? "Searching…" : `${results.data?.length ?? 0} results for "${q}"`}
           </p>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {(results.data ?? []).map((m, i) => (
-              <MediaCard key={`${m.id}-${i}`} item={m} />
-            ))}
-          </div>
+          {results.isPending ? (
+            <GridSkeleton count={10} />
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {(results.data ?? []).map((m, i) => (
+                <MediaCard key={`${m.id}-${i}`} item={m} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

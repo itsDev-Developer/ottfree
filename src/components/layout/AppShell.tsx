@@ -6,6 +6,7 @@ import { fetchSiteSettings } from "@/lib/cloudSettings";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, type ReactNode } from "react";
 import { trackVisit } from "@/store/analytics";
+import { useSpatialNavigation } from "@/hooks/useSpatialNavigation";
 import { SiteFooter } from "./SiteFooter";
 
 const navItems = [
@@ -30,6 +31,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const logoUrl = site.data?.logo_url;
 
   useEffect(() => { trackVisit(path); }, [path]);
+
+  // TV remote / arrow-key focus movement across rows, grids and cards.
+  useSpatialNavigation();
+
 
   const doLogout = useMutation({
     mutationFn: logout,
