@@ -438,9 +438,17 @@ const SLOTS: { value: string; label: string; description: string }[] = [
     description: "Shown before video playback starts",
   },
   { value: "home_top", label: "Home — top banner", description: "Under the featured carousel" },
+  { value: "home_mid", label: "Home — mid banner", description: "Between the content rows" },
+  { value: "home_bottom", label: "Home — bottom banner", description: "Above Recently Added" },
   { value: "watch_banner", label: "Watch — under player", description: "Below the video player" },
+  { value: "watch_below_info", label: "Watch — below details", description: "Under the file info" },
   { value: "sidebar", label: "Sidebar / Related", description: "Beside related content" },
+  { value: "channel_top", label: "OTT page — top", description: "Above the OTT grid" },
+  { value: "channel_bottom", label: "OTT page — bottom", description: "Below pagination" },
+  { value: "search_top", label: "Search — top", description: "Above search results" },
+  { value: "footer", label: "Footer — sitewide", description: "Above the site footer" },
 ];
+
 
 type AdType = "vast" | "image" | "script";
 
