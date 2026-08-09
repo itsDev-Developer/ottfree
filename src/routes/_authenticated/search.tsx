@@ -28,7 +28,6 @@ export const Route = createFileRoute("/_authenticated/search")({
   component: SearchPage,
 });
 
-
 function useDebounced<T>(value: T, delay = 300): T {
   const [v, setV] = useState(value);
   useEffect(() => {
@@ -55,7 +54,9 @@ function SearchPage() {
       const perChannel = await Promise.all(
         channels.slice(0, 5).map((c) =>
           searchChannel(c.id, q, 1)
-            .then((r) => r.items.map((i) => ({ ...i, chatId: i.chatId ?? c.id, channelName: c.name })))
+            .then((r) =>
+              r.items.map((i) => ({ ...i, chatId: i.chatId ?? c.id, channelName: c.name })),
+            )
             .catch(() => [] as MediaItem[]),
         ),
       );
@@ -65,10 +66,7 @@ function SearchPage() {
     staleTime: 60 * 1000,
   });
 
-  const popular = useMemo(
-    () => ["movies", "series", "anime", "documentary", "hd", "2024"],
-    [],
-  );
+  const popular = useMemo(() => ["movies", "series", "anime", "documentary", "hd", "2024"], []);
 
   return (
     <div className="px-4 py-8 md:px-8">
@@ -86,7 +84,10 @@ function SearchPage() {
             className="flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
           />
           {term && (
-            <button onClick={() => setTerm("")} className="text-muted-foreground hover:text-foreground">
+            <button
+              onClick={() => setTerm("")}
+              className="text-muted-foreground hover:text-foreground"
+            >
               <X className="h-4 w-4" />
             </button>
           )}
@@ -96,7 +97,9 @@ function SearchPage() {
           <div className="mt-8 space-y-6">
             {recent.length > 0 && (
               <div>
-                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Recent</h2>
+                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Recent
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {recent.map((r) => (
                     <button
@@ -111,7 +114,9 @@ function SearchPage() {
               </div>
             )}
             <div>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Popular</h2>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                Popular
+              </h2>
               <div className="flex flex-wrap gap-2">
                 {popular.map((r) => (
                   <button

@@ -1,5 +1,13 @@
 import { api } from "./api";
-import type { HomeData, Page, MediaItem, Folder, WatchData, SessionInfo, Channel } from "@/types/dto";
+import type {
+  HomeData,
+  Page,
+  MediaItem,
+  Folder,
+  WatchData,
+  SessionInfo,
+  Channel,
+} from "@/types/dto";
 
 // Backend now returns JSON on every route. We keep withCredentials cookie flow
 // via /api/proxy so AIOHTTP_SESSION is stored on this origin and sent back.
@@ -193,20 +201,32 @@ export async function fetchChannel(channelId: string, page = 1): Promise<Page<Me
   return { items, page, hasMore: resolveHasMore(data, items.length) };
 }
 
-export async function searchChannel(channelId: string, q: string, page = 1): Promise<Page<MediaItem>> {
-  const data = await getJson<ChannelResp>(`/search/${channelId}?q=${encodeURIComponent(q)}&page=${page}`);
+export async function searchChannel(
+  channelId: string,
+  q: string,
+  page = 1,
+): Promise<Page<MediaItem>> {
+  const data = await getJson<ChannelResp>(
+    `/search/${channelId}?q=${encodeURIComponent(q)}&page=${page}`,
+  );
   const items = (data.files ?? []).map(fileToItem).map((m) => ({ ...m, channelName: data.title }));
   return { items, page, hasMore: resolveHasMore(data, items.length) };
 }
 
 export async function fetchFolder(folderId: string, page = 1): Promise<Page<MediaItem | Folder>> {
-  const data = await getJson<PlaylistResp>(`/playlist?db=${encodeURIComponent(folderId)}&page=${page}`);
+  const data = await getJson<PlaylistResp>(
+    `/playlist?db=${encodeURIComponent(folderId)}&page=${page}`,
+  );
   const folders: Folder[] = (data.playlists ?? []).map(playlistToFolder);
   const files: MediaItem[] = (data.files ?? []).map(fileToItem);
   return { items: [...folders, ...files], page, hasMore: !!data.has_next };
 }
 
-export async function searchFolder(folderId: string, q: string, page = 1): Promise<Page<MediaItem | Folder>> {
+export async function searchFolder(
+  folderId: string,
+  q: string,
+  page = 1,
+): Promise<Page<MediaItem | Folder>> {
   const data = await getJson<PlaylistResp>(
     `/search/db/${encodeURIComponent(folderId)}?q=${encodeURIComponent(q)}&page=${page}`,
   );
@@ -224,7 +244,9 @@ function buildStreamUrl(chatId: string, messageId: string, hash: string, filenam
 }
 
 function guessResolution(title: string): string | undefined {
-  const m = title.match(/(\d{3,4})[pi]\b/i) ?? title.match(/\b(4k|uhd|2160p|1440p|1080p|720p|480p|360p)\b/i);
+  const m =
+    title.match(/(\d{3,4})[pi]\b/i) ??
+    title.match(/\b(4k|uhd|2160p|1440p|1080p|720p|480p|360p)\b/i);
   if (!m) return undefined;
   const v = m[0].toLowerCase();
   if (v === "4k" || v === "uhd") return "2160p (4K)";
@@ -235,7 +257,11 @@ function ensureExtension(title: string): string {
   return /\.[a-z0-9]{2,5}$/i.test(title) ? title : `${title}.mp4`;
 }
 
-export async function fetchWatch(chatId: string, messageId: string, hash: string): Promise<WatchData> {
+export async function fetchWatch(
+  chatId: string,
+  messageId: string,
+  hash: string,
+): Promise<WatchData> {
   // The backend's HTML /watch page 500s, so we rebuild the payload from the
   // channel listing and stream directly from /{chat_id}/{encoded_name}.
   let title = `Stream ${messageId}`;
@@ -282,7 +308,6 @@ export async function fetchWatch(chatId: string, messageId: string, hash: string
     related,
   };
 }
-
 
 export function thumbUrl(chatId: string, messageId?: string): string {
   const q = messageId ? `?id=${messageId}` : "";

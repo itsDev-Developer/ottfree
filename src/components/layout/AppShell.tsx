@@ -18,7 +18,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const qc = useQueryClient();
   const session = useQuery({ queryKey: ["session"], queryFn: fetchSession, staleTime: 60_000 });
-  const site = useQuery({ queryKey: ["site-settings"], queryFn: fetchSiteSettings, staleTime: 5 * 60 * 1000 });
+  const site = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: fetchSiteSettings,
+    staleTime: 5 * 60 * 1000,
+  });
   const isAdmin = !!session.data?.isAdmin;
 
   const mobileNav = useMemo(
@@ -26,15 +30,15 @@ export function AppShell({ children }: { children: ReactNode }) {
     [isAdmin],
   );
 
-
   const siteName = site.data?.site_name || "OttFree";
   const logoUrl = site.data?.logo_url;
 
-  useEffect(() => { trackVisit(path); }, [path]);
+  useEffect(() => {
+    trackVisit(path);
+  }, [path]);
 
   // TV remote / arrow-key focus movement across rows, grids and cards.
   useSpatialNavigation();
-
 
   const doLogout = useMutation({
     mutationFn: logout,
@@ -59,7 +63,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
       )}
       <header className="glass sticky top-0 z-40 flex h-16 items-center gap-4 px-4 md:px-8">
-
         <Link to="/home" className="flex items-center gap-2">
           {logoUrl ? (
             <img src={logoUrl} alt={siteName} className="h-8 w-8 rounded-lg object-cover" />
@@ -68,9 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Tv className="h-4 w-4 text-white" />
             </div>
           )}
-          <span className="font-display text-lg font-bold tracking-tight">
-            {siteName}
-          </span>
+          <span className="font-display text-lg font-bold tracking-tight">{siteName}</span>
         </Link>
         <nav className="ml-6 hidden items-center gap-1 md:flex">
           {navItems.map((n) => {
@@ -152,7 +153,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           );
         })}
       </nav>
-
     </div>
   );
 }

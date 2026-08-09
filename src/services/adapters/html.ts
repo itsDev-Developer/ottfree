@@ -11,7 +11,8 @@ function parse(html: string): Document {
 function abs(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
   if (url.startsWith("http")) return url;
-  if (url.startsWith("/api/thumb") || url.startsWith("/api/")) return `/api/proxy${url.replace(/^\/api/, "")}`;
+  if (url.startsWith("/api/thumb") || url.startsWith("/api/"))
+    return `/api/proxy${url.replace(/^\/api/, "")}`;
   if (url.startsWith("/")) return `/api/proxy${url}`;
   return url;
 }
@@ -97,17 +98,22 @@ export function adaptFolder(html: string, page: number): Page<MediaItem | Folder
   return { items: [...folders, ...files], page, hasMore };
 }
 
-export function adaptWatch(html: string, chatId: string, messageId: string, hash: string): WatchData {
+export function adaptWatch(
+  html: string,
+  chatId: string,
+  messageId: string,
+  hash: string,
+): WatchData {
   const doc = parse(html);
-  const title =
-    doc.querySelector("h1, .title")?.textContent?.trim() || `Video ${messageId}`;
+  const title = doc.querySelector("h1, .title")?.textContent?.trim() || `Video ${messageId}`;
   const video = doc.querySelector("video source, video");
   const src = video?.getAttribute("src") || "";
   const filename =
     src.split("/").pop()?.split("?")[0] ||
     doc.querySelector("[data-filename]")?.getAttribute("data-filename") ||
     "video.mp4";
-  const streamUrl = abs(src) || `/api/proxy/${chatId}/${encodeURIComponent(filename)}?id=${messageId}&hash=${hash}`;
+  const streamUrl =
+    abs(src) || `/api/proxy/${chatId}/${encodeURIComponent(filename)}?id=${messageId}&hash=${hash}`;
   const thumbnail = abs(doc.querySelector("video")?.getAttribute("poster") || undefined);
   const size = doc.querySelector("[data-size], .size")?.textContent?.trim();
   const resolution = doc.querySelector("[data-resolution], .resolution")?.textContent?.trim();

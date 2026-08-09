@@ -26,9 +26,16 @@ export function BannerAd({ slot, className = "" }: Props) {
   if (ads.length === 0) return null;
 
   return (
-    <div className={`mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-6 md:px-8 ${className}`}>
+    <div
+      className={`mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-6 md:px-8 ${className}`}
+    >
       {ads.map((ad, i) => (
-        <AdFrame key={ad.id ?? `${slot}-${i}`} ad={ad} slot={slot} onDismiss={i === 0 ? () => setDismissed(true) : undefined}>
+        <AdFrame
+          key={ad.id ?? `${slot}-${i}`}
+          ad={ad}
+          slot={slot}
+          onDismiss={i === 0 ? () => setDismissed(true) : undefined}
+        >
           {ad.script_code ? (
             <ScriptAd ad={ad} />
           ) : ad.image_url ? (
@@ -133,7 +140,9 @@ function ImageAd({ ad, slot }: { ad: AdRow; slot: string }) {
     >
       {img}
     </a>
-  ) : img;
+  ) : (
+    img
+  );
 }
 
 function LinkAd({ ad, slot }: { ad: AdRow; slot: string }) {
@@ -174,7 +183,9 @@ function ScriptAd({ ad }: { ad: AdRow }) {
       old.replaceWith(s);
     });
     host.appendChild(frag);
-    return () => { host.innerHTML = ""; };
+    return () => {
+      host.innerHTML = "";
+    };
   }, [ad.script_code]);
 
   return (

@@ -7,7 +7,6 @@ import { useState } from "react";
 
 type ChannelSearch = { page?: number; q?: string };
 
-
 export const Route = createFileRoute("/_authenticated/channel/$channelId")({
   validateSearch: (s: Record<string, unknown>): ChannelSearch => {
     const page = Number(s.page) || 1;
@@ -83,7 +82,6 @@ function ChannelPage() {
           />
         </form>
       </div>
-
 
       {query.isLoading ? (
         <SkeletonGrid />

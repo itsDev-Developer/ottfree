@@ -11,10 +11,7 @@ interface Props {
 
 export function HeroBanner({ item, priority = true }: Props) {
   const reduce = useReducedMotion();
-  const to =
-    item.chatId && item.hash
-      ? `/watch/${item.chatId}/${item.id}/${item.hash}`
-      : "/home";
+  const to = item.chatId && item.hash ? `/watch/${item.chatId}/${item.id}/${item.hash}` : "/home";
 
   return (
     <motion.section

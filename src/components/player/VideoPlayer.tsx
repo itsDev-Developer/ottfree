@@ -93,7 +93,12 @@ export function VideoPlayer({ src, poster, startTime = 0, onProgress, vastTagUrl
       quartileFired = new Set();
 
       const skipAfter = ad.skipOffset ?? 5;
-      setAdState({ playing: true, canSkip: false, remaining: skipAfter, clickThrough: ad.clickThrough });
+      setAdState({
+        playing: true,
+        canSkip: false,
+        remaining: skipAfter,
+        clickThrough: ad.clickThrough,
+      });
 
       const onAdTime = () => {
         const t = player.currentTime() ?? 0;

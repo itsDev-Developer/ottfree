@@ -45,12 +45,18 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="gradient-primary rounded-full px-5 py-2.5 text-sm font-semibold text-white"
           >
             Try again
           </button>
-          <a href="/" className="rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold">
+          <a
+            href="/"
+            className="rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold"
+          >
             Go home
           </a>
         </div>
@@ -65,16 +71,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "OttFree — Stream your Ott library" },
-      { name: "description", content: "A premium streaming experience for your Ottvchannels and folders. Watch anywhere, resume anywhere." },
+      {
+        name: "description",
+        content:
+          "A premium streaming experience for your Ottvchannels and folders. Watch anywhere, resume anywhere.",
+      },
       { name: "author", content: "SurfTG" },
       { property: "og:title", content: "OttFree — Stream your Ott library" },
-      { property: "og:description", content: "A premium streaming experience for your Ottvchannels and folders. Watch anywhere, resume anywhere." },
+      {
+        property: "og:description",
+        content:
+          "A premium streaming experience for your Ottvchannels and folders. Watch anywhere, resume anywhere.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "OttFree — Stream your Ott library" },
-      { name: "twitter:description", content: "A premium streaming experience for your Ottvchannels and folders. Watch anywhere, resume anywhere." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4a0e6633-0533-4457-b192-852fb5b14b60/id-preview-17318c72--13119a63-d4b0-4cc8-b7a6-7ec4a8398750.lovable.app-1783527175989.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4a0e6633-0533-4457-b192-852fb5b14b60/id-preview-17318c72--13119a63-d4b0-4cc8-b7a6-7ec4a8398750.lovable.app-1783527175989.png" },
+      {
+        name: "twitter:description",
+        content:
+          "A premium streaming experience for your Ottvchannels and folders. Watch anywhere, resume anywhere.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4a0e6633-0533-4457-b192-852fb5b14b60/id-preview-17318c72--13119a63-d4b0-4cc8-b7a6-7ec4a8398750.lovable.app-1783527175989.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4a0e6633-0533-4457-b192-852fb5b14b60/id-preview-17318c72--13119a63-d4b0-4cc8-b7a6-7ec4a8398750.lovable.app-1783527175989.png",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
