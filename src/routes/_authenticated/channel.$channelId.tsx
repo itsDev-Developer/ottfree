@@ -4,6 +4,7 @@ import { fetchChannel, searchChannel } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
+import { BannerAd } from "@/components/media/BannerAd";
 
 type ChannelSearch = { page?: number; q?: string };
 
@@ -83,6 +84,8 @@ function ChannelPage() {
         </form>
       </div>
 
+      <BannerAd slot="channel_top" className="!mx-0 mb-4 !py-0" />
+
       {query.isLoading ? (
         <SkeletonGrid />
       ) : items.length === 0 ? (
@@ -114,6 +117,8 @@ function ChannelPage() {
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
+
+      <BannerAd slot="channel_bottom" className="!mx-0" />
     </div>
   );
 }
