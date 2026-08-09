@@ -215,6 +215,9 @@ function HomePage() {
         />
       ))}
 
+      <BannerAd slot="home_bottom" />
+
+
       {data.recent.length > 0 && (
         <section className="mt-10 px-4 md:px-8">
           <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
