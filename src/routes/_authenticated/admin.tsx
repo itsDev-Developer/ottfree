@@ -33,14 +33,16 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type Tab = "overview" | "ads" | "site" | "maintenance";
+type Tab = "overview" | "ads" | "adstats" | "site" | "maintenance";
 
 const TABS: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, description: "Visits and playback statistics" },
   { id: "ads", label: "Ads", icon: Megaphone, description: "Manage ad slots & networks" },
+  { id: "adstats", label: "Ad Analytics", icon: DollarSign, description: "Impressions, clicks, CTR and estimated revenue" },
   { id: "site", label: "Site", icon: Palette, description: "Branding, header & footer" },
   { id: "maintenance", label: "Maintenance", icon: Wrench, description: "Take the site offline for viewers" },
 ];
+
 
 function AdminPage() {
   const [tab, setTab] = useState<Tab>("overview");
