@@ -72,3 +72,43 @@ export function clearAnalytics() {
   localStorage.removeItem(VISITS_KEY);
   localStorage.removeItem(PLAYS_KEY);
 }
+
+/* -------------------- Ad analytics -------------------- */
+
+const AD_KEY = "surftg:analytics:ads";
+const CPM_KEY = "surftg:analytics:cpm";
+
+export interface AdEvent {
+  kind: "impression" | "click";
+  slot: string;
+  network: string;
+  adId: string;
+  label?: string;
+  ts: number;
+}
+
+export function trackAdEvent(e: Omit<AdEvent, "ts">) {
+  if (typeof window === "undefined") return;
+  const events = read<AdEvent>(AD_KEY);
+  events.push({ ...e, ts: Date.now() });
+  write(AD_KEY, events);
+}
+
+export function getAdEvents(): AdEvent[] {
+  return read<AdEvent>(AD_KEY);
+}
+
+export function clearAdEvents() {
+  localStorage.removeItem(AD_KEY);
+}
+
+/** Estimated CPM (revenue per 1000 impressions) used for revenue projections. */
+export function getCpm(): number {
+  if (typeof window === "undefined") return 1;
+  const raw = Number(localStorage.getItem(CPM_KEY));
+  return Number.isFinite(raw) && raw > 0 ? raw : 1;
+}
+
+export function setCpm(value: number) {
+  localStorage.setItem(CPM_KEY, String(value));
+}
