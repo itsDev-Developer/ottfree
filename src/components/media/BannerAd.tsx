@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAdsBySlot, type AdRow } from "@/lib/cloudSettings";
+import { trackAdEvent } from "@/store/analytics";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -25,58 +26,125 @@ export function BannerAd({ slot, className = "" }: Props) {
   if (ads.length === 0) return null;
 
   return (
-    <div className={`mx-4 mt-6 flex flex-col gap-4 md:mx-8 ${className}`}>
+    <div className={`mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-6 md:px-8 ${className}`}>
       {ads.map((ad, i) => (
-        <div key={ad.id ?? `${slot}-${i}`} className="relative">
-          <span className="absolute left-3 top-3 z-10 rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/80">
-            Ad
-          </span>
-          {i === 0 && (
-            <button
-              onClick={() => setDismissed(true)}
-              aria-label="Dismiss ad"
-              className="absolute right-3 top-3 z-10 rounded-full bg-black/70 p-1 text-white/80 hover:bg-black/90 hover:text-white"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
+        <AdFrame key={ad.id ?? `${slot}-${i}`} ad={ad} slot={slot} onDismiss={i === 0 ? () => setDismissed(true) : undefined}>
           {ad.script_code ? (
             <ScriptAd ad={ad} />
           ) : ad.image_url ? (
-            <ImageAd ad={ad} />
+            <ImageAd ad={ad} slot={slot} />
           ) : ad.link_url ? (
-            <LinkAd ad={ad} />
+            <LinkAd ad={ad} slot={slot} />
           ) : null}
-        </div>
+        </AdFrame>
       ))}
     </div>
   );
 }
 
-function ImageAd({ ad }: { ad: AdRow }) {
+/** Wrapper that centers the creative and records one impression when it becomes visible. */
+function AdFrame({
+  ad,
+  slot,
+  onDismiss,
+  children,
+}: {
+  ad: AdRow;
+  slot: string;
+  onDismiss?: () => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const seen = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && !seen.current) {
+            seen.current = true;
+            trackAdEvent({
+              kind: "impression",
+              slot,
+              network: ad.network ?? "unknown",
+              adId: ad.id ?? `${slot}`,
+              label: ad.label ?? undefined,
+            });
+            io.disconnect();
+          }
+        }
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ad.id, ad.network, ad.label, slot]);
+
+  return (
+    <div ref={ref} className="relative flex w-full justify-center">
+      <div className="relative w-full max-w-[970px]">
+        <span className="absolute left-3 top-3 z-10 rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/80">
+          Ad
+        </span>
+        {onDismiss && (
+          <button
+            onClick={onDismiss}
+            aria-label="Dismiss ad"
+            className="absolute right-3 top-3 z-10 rounded-full bg-black/70 p-1 text-white/80 transition hover:bg-black/90 hover:text-white"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function recordClick(ad: AdRow, slot: string) {
+  trackAdEvent({
+    kind: "click",
+    slot,
+    network: ad.network ?? "unknown",
+    adId: ad.id ?? slot,
+    label: ad.label ?? undefined,
+  });
+}
+
+function ImageAd({ ad, slot }: { ad: AdRow; slot: string }) {
   if (!ad.image_url) return null;
   const img = (
     <img
       src={ad.image_url}
       alt={ad.label ?? "Sponsored"}
-      className="h-auto w-full rounded-2xl border border-white/10 object-cover"
+      loading="lazy"
+      className="mx-auto h-auto w-full rounded-2xl border border-white/10 object-contain"
     />
   );
   return ad.link_url ? (
-    <a href={ad.link_url} target="_blank" rel="noopener noreferrer sponsored" className="block">
+    <a
+      href={ad.link_url}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      onClick={() => recordClick(ad, slot)}
+      className="block"
+    >
       {img}
     </a>
   ) : img;
 }
 
-function LinkAd({ ad }: { ad: AdRow }) {
+function LinkAd({ ad, slot }: { ad: AdRow; slot: string }) {
   if (!ad.link_url) return null;
   return (
     <a
       href={ad.link_url}
       target="_blank"
       rel="noopener noreferrer sponsored"
-      className="flex min-h-[90px] w-full items-center justify-center rounded-2xl border border-white/10 bg-black/20 p-4 text-center text-sm font-medium text-white/90 hover:bg-black/30"
+      onClick={() => recordClick(ad, slot)}
+      className="flex min-h-[90px] w-full items-center justify-center rounded-2xl border border-white/10 bg-black/20 p-4 text-center text-sm font-medium text-white/90 transition hover:bg-black/30"
     >
       {ad.label ?? "Sponsored"}
     </a>
@@ -112,7 +180,7 @@ function ScriptAd({ ad }: { ad: AdRow }) {
   return (
     <div
       ref={ref}
-      className="min-h-[90px] w-full overflow-hidden rounded-2xl border border-white/10 bg-black/20 p-2"
+      className="flex min-h-[90px] w-full items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/20 p-2 [&_iframe]:mx-auto [&_img]:mx-auto"
     />
   );
 }
