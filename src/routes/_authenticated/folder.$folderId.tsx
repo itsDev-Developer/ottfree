@@ -55,7 +55,9 @@ function FolderPage() {
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="glass rounded-3xl p-12 text-center text-muted-foreground">Empty folder.</div>
+        <div className="glass rounded-3xl p-12 text-center text-muted-foreground">
+          Empty folder.
+        </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {items.map((it, i) =>

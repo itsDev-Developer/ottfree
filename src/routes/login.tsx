@@ -76,13 +76,15 @@ function LoginPage() {
             Demo credentials
           </p>
           <code className="mt-1 block font-mono text-sm text-foreground">
-            User&nbsp;/&nbsp;User
+            user&nbsp;/&nbsp;user
           </code>
         </div>
 
         <form onSubmit={form.handleSubmit((v) => doLogin.mutate(v))} className="space-y-4">
           <label className="block">
-            <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Username</span>
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Username
+            </span>
             <div className="relative">
               <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -93,11 +95,15 @@ function LoginPage() {
               />
             </div>
             {form.formState.errors.username && (
-              <p className="mt-1 text-xs text-destructive">{form.formState.errors.username.message}</p>
+              <p className="mt-1 text-xs text-destructive">
+                {form.formState.errors.username.message}
+              </p>
             )}
           </label>
           <label className="block">
-            <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Password</span>
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Password
+            </span>
             <div className="relative">
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -108,7 +114,9 @@ function LoginPage() {
               />
             </div>
             {form.formState.errors.password && (
-              <p className="mt-1 text-xs text-destructive">{form.formState.errors.password.message}</p>
+              <p className="mt-1 text-xs text-destructive">
+                {form.formState.errors.password.message}
+              </p>
             )}
           </label>
 

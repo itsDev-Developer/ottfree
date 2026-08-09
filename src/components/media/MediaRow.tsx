@@ -12,7 +12,14 @@ interface Props {
 }
 
 /** Horizontal, snap-scrolling row of media cards. Sizes scale from phone to TV. */
-export function MediaRow({ title, subtitle, items, aspect = "poster", numbered, limit = 20 }: Props) {
+export function MediaRow({
+  title,
+  subtitle,
+  items,
+  aspect = "poster",
+  numbered,
+  limit = 20,
+}: Props) {
   const list = items.slice(0, limit);
   if (list.length === 0) return null;
 

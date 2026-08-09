@@ -45,9 +45,7 @@ async function proxy(request: Request, splat: string): Promise<Response> {
     const k = key.toLowerCase();
     if (HOP_BY_HOP.has(k)) return;
     if (k === "set-cookie") {
-      const rewritten = value
-        .replace(/;\s*Domain=[^;]+/gi, "")
-        .replace(/;\s*Secure/gi, "");
+      const rewritten = value.replace(/;\s*Domain=[^;]+/gi, "").replace(/;\s*Secure/gi, "");
       respHeaders.append("set-cookie", rewritten);
       return;
     }
@@ -81,15 +79,23 @@ async function proxy(request: Request, splat: string): Promise<Response> {
   // browser XHR does NOT follow into /api/proxy/login (which 500s), and the
   // client-side interceptor can bounce the user to the SPA /login page.
   if (
-    (upstream.status === 301 || upstream.status === 302 || upstream.status === 303 || upstream.status === 307 || upstream.status === 308)
+    upstream.status === 301 ||
+    upstream.status === 302 ||
+    upstream.status === 303 ||
+    upstream.status === 307 ||
+    upstream.status === 308
   ) {
     const loc = upstream.headers.get("location") ?? "";
-    if (loc === "/login" || loc === "/api/proxy/login" || loc.startsWith("/login?") || loc.startsWith("/api/proxy/login?")) {
+    if (
+      loc === "/login" ||
+      loc === "/api/proxy/login" ||
+      loc.startsWith("/login?") ||
+      loc.startsWith("/api/proxy/login?")
+    ) {
       respHeaders.delete("location");
       return new Response(null, { status: 401, headers: respHeaders });
     }
   }
-
 
   return new Response(upstream.body, {
     status: upstream.status,

@@ -14,7 +14,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { WatchProgress } from "@/store/continueWatching";
 import type { MediaItem } from "@/types/dto";
 
-
 const homeOptions = queryOptions({
   queryKey: ["home"],
   queryFn: fetchHome,
@@ -27,7 +26,10 @@ export const Route = createFileRoute("/_authenticated/home")({
   loader: ({ context }) => context.queryClient.ensureQueryData(homeOptions),
   head: ({ loaderData }) => {
     const channels = loaderData?.channels ?? [];
-    const names = channels.slice(0, 4).map((c) => c.name).filter(Boolean);
+    const names = channels
+      .slice(0, 4)
+      .map((c) => c.name)
+      .filter(Boolean);
     const title = "Watch Free Movies, Series & Live OTT Streams — SurfTG";
     const description = names.length
       ? `Stream ${channels.length}+ OTT sources including ${names.join(", ")}. Instant playback of movies, series and more — no downloads required.`
@@ -55,7 +57,6 @@ export const Route = createFileRoute("/_authenticated/home")({
   pendingComponent: HomeSkeleton,
   component: HomePage,
 });
-
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeOptions);
@@ -100,7 +101,10 @@ function HomePage() {
     const movies = all.filter((m) => !isSeries(m) && !isAnime(m));
     const uhd = all.filter(is4k);
     const hd = all.filter((m) => !is4k(m) && isHd(m));
-    const trending = [...all].slice(0, 40).filter((m) => !!m.thumbnail).slice(0, 10);
+    const trending = [...all]
+      .slice(0, 40)
+      .filter((m) => !!m.thumbnail)
+      .slice(0, 10);
 
     const bySource = data.channels
       .slice(0, 6)
@@ -109,7 +113,6 @@ function HomePage() {
 
     return { trending, movies, series, anime, uhd, hd, bySource };
   }, [data.recent, data.channels]);
-
 
   return (
     <div>
@@ -125,8 +128,6 @@ function HomePage() {
       )}
 
       <BannerAd slot="home_top" />
-
-
 
       {cw.length > 0 && (
         <Row title="Continue Watching" subtitle="Pick up where you left off">
@@ -235,7 +236,6 @@ function HomePage() {
           )}
         </section>
       )}
-
     </div>
   );
 }

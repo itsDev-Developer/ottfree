@@ -20,9 +20,7 @@ const watchOptions = (chatId: string, messageId: string, hash: string) =>
 
 export const Route = createFileRoute("/_authenticated/watch/$chatId/$messageId/$hash")({
   loader: ({ context, params }) =>
-    context.queryClient.ensureQueryData(
-      watchOptions(params.chatId, params.messageId, params.hash),
-    ),
+    context.queryClient.ensureQueryData(watchOptions(params.chatId, params.messageId, params.hash)),
   head: ({ params, loaderData }) => {
     const url = `https://ottfree.in/watch/${params.chatId}/${params.messageId}/${params.hash}`;
     const name = loaderData?.title ?? "Stream";
@@ -71,7 +69,6 @@ function WatchPage() {
 
   const query = useQuery(watchOptions(chatId, messageId, hash));
 
-
   const preroll = useQuery({
     queryKey: ["ads", "preroll"],
     queryFn: () => fetchAdsBySlot("preroll"),
@@ -116,9 +113,15 @@ function WatchPage() {
   return (
     <div className="px-4 py-6 md:px-8">
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/home" className="hover:text-foreground">Home</Link>
+        <Link to="/home" className="hover:text-foreground">
+          Home
+        </Link>
         <ChevronLeft className="h-3 w-3 rotate-180" />
-        <Link to="/channel/$channelId" params={{ channelId: chatId }} className="hover:text-foreground">
+        <Link
+          to="/channel/$channelId"
+          params={{ channelId: chatId }}
+          className="hover:text-foreground"
+        >
           OTT {chatId}
         </Link>
         <ChevronLeft className="h-3 w-3 rotate-180" />

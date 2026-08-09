@@ -29,8 +29,7 @@ function nextInDirection(current: HTMLElement, dir: Dir): HTMLElement | null {
     const dx = to.x - from.x;
     const dy = to.y - from.y;
 
-    const primary =
-      dir === "left" ? -dx : dir === "right" ? dx : dir === "up" ? -dy : dy;
+    const primary = dir === "left" ? -dx : dir === "right" ? dx : dir === "up" ? -dy : dy;
     if (primary <= 8) continue; // wrong side
 
     const cross = dir === "left" || dir === "right" ? Math.abs(dy) : Math.abs(dx);

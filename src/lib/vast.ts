@@ -57,7 +57,8 @@ export async function loadVast(tagUrl: string, depth = 0): Promise<VastAd | null
     .map((n) => n.textContent?.trim() ?? "")
     .filter(Boolean);
 
-  const clickThrough = doc.querySelector("VideoClicks ClickThrough")?.textContent?.trim() || undefined;
+  const clickThrough =
+    doc.querySelector("VideoClicks ClickThrough")?.textContent?.trim() || undefined;
 
   const trackingEvents: Record<string, string[]> = {};
   linear.querySelectorAll("Tracking").forEach((n) => {

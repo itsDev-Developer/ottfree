@@ -18,9 +18,7 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-6xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="font-display text-lg font-bold">{siteName}</p>
-          {footerText && (
-            <p className="mt-1 text-sm text-muted-foreground">{footerText}</p>
-          )}
+          {footerText && <p className="mt-1 text-sm text-muted-foreground">{footerText}</p>}
         </div>
         {socials.length > 0 && (
           <ul className="flex flex-wrap gap-3 text-sm">
