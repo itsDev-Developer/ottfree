@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { fetchSession } from "@/services/backend";
 import { getVisits, getPlays, clearAnalytics, type VisitEvent, type PlayEvent } from "@/store/analytics";
+import { getAdEvents, clearAdEvents, getCpm, setCpm, type AdEvent } from "@/store/analytics";
 import {
   fetchAllAds,
   fetchSiteSettings,
@@ -15,7 +16,7 @@ import {
 import { upsertAd, deleteAd, upsertSiteSetting } from "@/lib/adminSettings.functions";
 import {
   Activity, Eye, Play, Users, Trash2, ChevronLeft, Megaphone, Plus,
-  BarChart3, Palette, Wrench, LayoutDashboard, Save, ExternalLink,
+  BarChart3, Palette, Wrench, LayoutDashboard, Save, ExternalLink, DollarSign, MousePointerClick,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -85,6 +86,7 @@ function AdminPage() {
 
       {tab === "overview" && <OverviewSection />}
       {tab === "ads" && <AdsSection />}
+      {tab === "adstats" && <AdStatsSection />}
       {tab === "site" && <SiteSection />}
       {tab === "maintenance" && <MaintenanceSection />}
     </div>
@@ -201,6 +203,127 @@ function OverviewSection() {
               <li key={i} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm">
                 <span className="truncate">{p.title}</span>
                 <span className="font-semibold">{p.count} plays</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------- Ad analytics -------------------- */
+
+function AdStatsSection() {
+  const [events, setEvents] = useState<AdEvent[]>([]);
+  const [cpm, setCpmState] = useState(1);
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    setEvents(getAdEvents());
+    setCpmState(getCpm());
+  }, [tick]);
+
+  const stats = useMemo(() => {
+    const now = Date.now();
+    const impressions = events.filter((e) => e.kind === "impression");
+    const clicks = events.filter((e) => e.kind === "click");
+    const imp24 = impressions.filter((e) => now - e.ts < DAY).length;
+    const ctr = impressions.length ? (clicks.length / impressions.length) * 100 : 0;
+    const revenue = (impressions.length / 1000) * cpm;
+
+    const bySlot = new Map<string, { impressions: number; clicks: number }>();
+    for (const e of events) {
+      const key = `${e.slot} · ${e.network}`;
+      const row = bySlot.get(key) ?? { impressions: 0, clicks: 0 };
+      if (e.kind === "impression") row.impressions++;
+      else row.clicks++;
+      bySlot.set(key, row);
+    }
+    const rows = [...bySlot.entries()].sort((a, b) => b[1].impressions - a[1].impressions);
+
+    const days: { label: string; count: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const start = now - (i + 1) * DAY;
+      const end = now - i * DAY;
+      const count = impressions.filter((e) => e.ts >= start && e.ts < end).length;
+      days.push({ label: new Date(end - DAY / 2).toLocaleDateString(undefined, { weekday: "short" }), count });
+    }
+    const maxDay = Math.max(1, ...days.map((d) => d.count));
+
+    return { impressions: impressions.length, clicks: clicks.length, imp24, ctr, revenue, rows, days, maxDay };
+  }, [events, cpm]);
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
+        <label className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm">
+          <span className="text-muted-foreground">CPM ($ / 1000 impressions)</span>
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={cpm}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setCpmState(v);
+              setCpm(v);
+            }}
+            className="w-20 rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-right outline-none focus:border-primary/60"
+          />
+        </label>
+        <button
+          onClick={() => { clearAdEvents(); setTick((t) => t + 1); }}
+          className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
+        >
+          <Trash2 className="h-4 w-4" /> Reset ad data
+        </button>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard icon={<Eye className="h-5 w-5" />} label="Impressions" value={stats.impressions} />
+        <StatCard icon={<Activity className="h-5 w-5" />} label="Impressions (24h)" value={stats.imp24} />
+        <StatCard icon={<MousePointerClick className="h-5 w-5" />} label="Clicks" value={stats.clicks} />
+        <StatCard icon={<DollarSign className="h-5 w-5" />} label="Est. revenue" value={`$${stats.revenue.toFixed(2)}`} />
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <section className="glass rounded-3xl p-6">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            <h2 className="font-display text-lg font-bold">Impressions — last 7 days</h2>
+          </div>
+          <div className="mt-6 flex h-48 items-end justify-between gap-3">
+            {stats.days.map((d, i) => (
+              <div key={i} className="flex flex-1 flex-col items-center gap-2">
+                <div className="flex h-full w-full items-end">
+                  <div
+                    className="gradient-primary w-full rounded-t-md transition-all"
+                    style={{ height: `${(d.count / stats.maxDay) * 100}%`, minHeight: d.count ? 4 : 0 }}
+                    title={`${d.count} impressions`}
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground">{d.label}</span>
+                <span className="text-xs font-medium">{d.count}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="glass rounded-3xl p-6">
+          <h2 className="font-display text-lg font-bold">Performance by slot</h2>
+          <p className="mt-1 text-xs text-muted-foreground">CTR {stats.ctr.toFixed(2)}% overall</p>
+          <ul className="mt-4 space-y-2">
+            {stats.rows.length === 0 && (
+              <li className="text-sm text-muted-foreground">No ad activity recorded yet.</li>
+            )}
+            {stats.rows.map(([key, row]) => (
+              <li key={key} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm">
+                <span className="truncate font-mono text-xs text-muted-foreground">{key}</span>
+                <span className="shrink-0 font-semibold">
+                  {row.impressions} imp · {row.clicks} clicks ·{" "}
+                  {row.impressions ? ((row.clicks / row.impressions) * 100).toFixed(1) : "0.0"}%
+                </span>
               </li>
             ))}
           </ul>
