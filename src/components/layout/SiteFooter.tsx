@@ -51,6 +51,9 @@ export function SiteFooter() {
       <p className="mx-auto mt-6 max-w-6xl text-xs text-muted-foreground/70">
         © {new Date().getFullYear()} {siteName}. All rights reserved.
       </p>
-    </footer>
+      </footer>
+    </>
+  );
+
   );
 }
