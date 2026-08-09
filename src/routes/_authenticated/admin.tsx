@@ -988,7 +988,7 @@ function Field({
   );
 }
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
   return (
     <div className="glass rounded-3xl p-5">
       <div className="flex items-center gap-3 text-muted-foreground">
