@@ -188,9 +188,12 @@ function WatchPage() {
             <Info label="Resolution" value={w.resolution ?? "—"} />
             <Info label="OTT" value={w.channelName ?? chatId} />
           </div>
+
+          <BannerAd slot="watch_below_info" className="!mx-0 mt-4" />
         </div>
 
         <aside className="space-y-4">
+          <BannerAd slot="sidebar" className="!mx-0 !max-w-none !px-0 !py-0" />
           <h2 className="font-display text-lg font-bold">More from this channel</h2>
           <div className="space-y-3">
             {w.related.slice(0, 8).map((m, i) => (
@@ -201,6 +204,7 @@ function WatchPage() {
             )}
           </div>
         </aside>
+
       </div>
     </div>
   );

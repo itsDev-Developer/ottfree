@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchSiteSettings } from "@/lib/cloudSettings";
+import { BannerAd } from "@/components/media/BannerAd";
+
 
 export function SiteFooter() {
   const { data } = useQuery({
@@ -14,7 +16,9 @@ export function SiteFooter() {
   const socials = data?.social_links ?? [];
 
   return (
-    <footer className="mt-16 border-t border-white/10 bg-black/30 px-4 py-10 md:px-8">
+    <>
+      <BannerAd slot="footer" />
+      <footer className="mt-16 border-t border-white/10 bg-black/30 px-4 py-10 md:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="font-display text-lg font-bold">{siteName}</p>
@@ -47,6 +51,8 @@ export function SiteFooter() {
       <p className="mx-auto mt-6 max-w-6xl text-xs text-muted-foreground/70">
         © {new Date().getFullYear()} {siteName}. All rights reserved.
       </p>
-    </footer>
+      </footer>
+    </>
   );
 }
+

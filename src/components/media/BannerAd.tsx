@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAdsBySlot, type AdRow } from "@/lib/cloudSettings";
 import { trackAdEvent } from "@/store/analytics";
-import { X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
   slot: string;
@@ -10,14 +9,12 @@ interface Props {
 }
 
 export function BannerAd({ slot, className = "" }: Props) {
-  const [dismissed, setDismissed] = useState(false);
   const { data } = useQuery({
     queryKey: ["ads", slot],
     queryFn: () => fetchAdsBySlot(slot),
     staleTime: 5 * 60 * 1000,
   });
 
-  if (dismissed) return null;
   // Render every enabled ad that has SOMETHING renderable: a script,
   // an image, or a bare link (some networks use text-only referral links).
   const ads = (data ?? []).filter(
@@ -30,12 +27,7 @@ export function BannerAd({ slot, className = "" }: Props) {
       className={`mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-6 md:px-8 ${className}`}
     >
       {ads.map((ad, i) => (
-        <AdFrame
-          key={ad.id ?? `${slot}-${i}`}
-          ad={ad}
-          slot={slot}
-          onDismiss={i === 0 ? () => setDismissed(true) : undefined}
-        >
+        <AdFrame key={ad.id ?? `${slot}-${i}`} ad={ad} slot={slot}>
           {ad.script_code ? (
             <ScriptAd ad={ad} />
           ) : ad.image_url ? (
@@ -49,16 +41,15 @@ export function BannerAd({ slot, className = "" }: Props) {
   );
 }
 
+
 /** Wrapper that centers the creative and records one impression when it becomes visible. */
 function AdFrame({
   ad,
   slot,
-  onDismiss,
   children,
 }: {
   ad: AdRow;
   slot: string;
-  onDismiss?: () => void;
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -95,15 +86,7 @@ function AdFrame({
         <span className="absolute left-3 top-3 z-10 rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/80">
           Ad
         </span>
-        {onDismiss && (
-          <button
-            onClick={onDismiss}
-            aria-label="Dismiss ad"
-            className="absolute right-3 top-3 z-10 rounded-full bg-black/70 p-1 text-white/80 transition hover:bg-black/90 hover:text-white"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        )}
+
         {children}
       </div>
     </div>

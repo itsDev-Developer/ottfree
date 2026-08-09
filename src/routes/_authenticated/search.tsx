@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchHome, searchChannel } from "@/services/backend";
 import { MediaCard } from "@/components/media/MediaCard";
 import { GridSkeleton } from "@/components/media/Skeletons";
+import { BannerAd } from "@/components/media/BannerAd";
 import { getRecentSearches, pushRecentSearch } from "@/store/continueWatching";
 import type { MediaItem } from "@/types/dto";
 
@@ -135,6 +136,7 @@ function SearchPage() {
 
       {q && (
         <div className="mt-10">
+          <BannerAd slot="search_top" className="!mx-0 mb-2 !py-0" />
           <p className="mb-4 text-sm text-muted-foreground">
             {results.isPending ? "Searching…" : `${results.data?.length ?? 0} results for "${q}"`}
           </p>
