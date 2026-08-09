@@ -76,8 +76,9 @@ function LoginPage() {
             Demo credentials
           </p>
           <code className="mt-1 block font-mono text-sm text-foreground">
-            User&nbsp;/&nbsp;User
+            user&nbsp;/&nbsp;user
           </code>
+
         </div>
 
         <form onSubmit={form.handleSubmit((v) => doLogin.mutate(v))} className="space-y-4">
