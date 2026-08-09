@@ -46,12 +46,10 @@ export function BannerAd({ slot, className = "" }: Props) {
 function AdFrame({
   ad,
   slot,
-  onDismiss,
   children,
 }: {
   ad: AdRow;
   slot: string;
-  onDismiss?: () => void;
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -88,15 +86,7 @@ function AdFrame({
         <span className="absolute left-3 top-3 z-10 rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/80">
           Ad
         </span>
-        {onDismiss && (
-          <button
-            onClick={onDismiss}
-            aria-label="Dismiss ad"
-            className="absolute right-3 top-3 z-10 rounded-full bg-black/70 p-1 text-white/80 transition hover:bg-black/90 hover:text-white"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        )}
+
         {children}
       </div>
     </div>
