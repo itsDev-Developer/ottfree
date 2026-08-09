@@ -54,6 +54,5 @@ export function SiteFooter() {
       </footer>
     </>
   );
-
-  );
 }
+
