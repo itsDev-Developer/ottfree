@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAdsBySlot, type AdRow } from "@/lib/cloudSettings";
 import { trackAdEvent } from "@/store/analytics";
-import { X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
   slot: string;
@@ -10,14 +9,12 @@ interface Props {
 }
 
 export function BannerAd({ slot, className = "" }: Props) {
-  const [dismissed, setDismissed] = useState(false);
   const { data } = useQuery({
     queryKey: ["ads", slot],
     queryFn: () => fetchAdsBySlot(slot),
     staleTime: 5 * 60 * 1000,
   });
 
-  if (dismissed) return null;
   // Render every enabled ad that has SOMETHING renderable: a script,
   // an image, or a bare link (some networks use text-only referral links).
   const ads = (data ?? []).filter(
@@ -30,12 +27,7 @@ export function BannerAd({ slot, className = "" }: Props) {
       className={`mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-6 md:px-8 ${className}`}
     >
       {ads.map((ad, i) => (
-        <AdFrame
-          key={ad.id ?? `${slot}-${i}`}
-          ad={ad}
-          slot={slot}
-          onDismiss={i === 0 ? () => setDismissed(true) : undefined}
-        >
+        <AdFrame key={ad.id ?? `${slot}-${i}`} ad={ad} slot={slot}>
           {ad.script_code ? (
             <ScriptAd ad={ad} />
           ) : ad.image_url ? (
@@ -48,6 +40,7 @@ export function BannerAd({ slot, className = "" }: Props) {
     </div>
   );
 }
+
 
 /** Wrapper that centers the creative and records one impression when it becomes visible. */
 function AdFrame({
