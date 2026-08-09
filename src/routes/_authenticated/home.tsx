@@ -182,9 +182,13 @@ function HomePage() {
 
       <MediaRow title="Movies" subtitle="Feature-length picks" items={sections.movies} />
       <MediaRow title="Series & Episodes" subtitle="Binge-ready titles" items={sections.series} />
+
+      <BannerAd slot="home_mid" />
+
       <MediaRow title="Anime" subtitle="Subbed & dubbed" items={sections.anime} />
       <MediaRow title="4K & Ultra HD" subtitle="Highest quality available" items={sections.uhd} />
       <MediaRow title="HD Picks" subtitle="1080p and above" items={sections.hd} />
+
 
       {data.folders.length > 0 && (
         <Row title="Folders" subtitle="Curated collections">
