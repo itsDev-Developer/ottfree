@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const BACKEND = "https://varying-orsa-komi106-7ef913ad.koyeb.app";
+const BACKEND = "https://tgstr-405y.onrender.com";
 
 // Hop-by-hop headers that should not be forwarded
 const HOP_BY_HOP = new Set([

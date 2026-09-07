@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
-const BACKEND = "https://varying-orsa-komi106-7ef913ad.koyeb.app";
+const BACKEND = "https://tgstr-405y.onrender.com";
 
 async function requireAdmin(): Promise<void> {
   const req = getRequest();
